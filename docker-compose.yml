@@ -1,0 +1,78 @@
+version: "3.7"
+
+services:
+  ###########################################################################
+  #######                       HUNTING SERVER                        #######
+  ###########################################################################
+  hunting-server:
+    depends_on:
+      - minio
+    ports:
+      - 8000:8000
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: >
+      /bin/sh -c "
+      uvicorn app.main:app --reload --host 0.0.0.0;
+      "      
+    volumes:
+      - .:/app   
+    environment:
+
+      # CORE PARAMS
+      - PROJECT_NAME=Hunting Server
+      - API_V1_STR=/api/v1
+      - MODE=development
+
+      # EXAMPLE PARAMS
+      - EXAMPLE_URL=https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv
+
+      # S3 (MINIO) PARAMS
+      - S3_ENDPOINT=http://minio:9000
+      - S3_BUCKET=hunting
+      - S3_KEY=minio
+      - S3_SECRET=password
+
+    networks:
+      - hunting
+
+
+  ###########################################################################
+  #######                        MINIO                                #######
+  ###########################################################################
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./volumes/minio/data:/export
+      - ./volumes/minio/config:/root/.minio
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=password
+    networks:
+      - hunting
+    command: server --console-address :9001 /export
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    volumes:
+      - ./wait-for-it.sh:/usr/local/bin/wait-for-it.sh
+    networks:
+      - hunting
+    entrypoint: >
+      /bin/sh -c "
+      apk add --no-cache bash;
+      wait-for-it.sh minio:9000 -- echo 'Minio is up. Creating the bucket!!';
+      /usr/bin/mc config host add myminio http://minio:9000 minio password;
+      /usr/bin/mc mb myminio/hunting;
+      /usr/bin/mc policy set download myminio/hunting;
+      exit 0;
+      "
+
+networks:
+  hunting:

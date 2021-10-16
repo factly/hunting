@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hunting"
 version = "0.1.0"
-description = "Hunting is Pandas profiling exposed as REST API"
+description = "Hunting is data profiling exposed as REST API. It is built on top of Pandas Profiling."
 authors = ["Factly Media & Research"]
 license = "MIT"
 

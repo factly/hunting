@@ -44,4 +44,4 @@ Or use the following command to stop the application, and remove all the contain
 - Create `.env` file in the root directory based on `.env.example`. 
     - The values in `.env.example` are pre-configured to running the application using the default `docker-compose.yml`
 - If no `.env` file is found in the root directory, the default values provided in `/app/core/config.py` will be considered for the environment variables.
-    - - The values in `/app/core/config.py` are pre-configured to running the application using the default `docker-compose.yml`
+    - The values in `/app/core/config.py` are pre-configured to running the application using the default `docker-compose.yml`

@@ -1,31 +1,31 @@
 import json
 from typing import List
 
-from fastapi import APIRouter, Depends, Request, Response, encoders
-from fastapi.responses import JSONResponse
-from pandas_profiling.config import Samples
-from app.core.config import Settings
+from fastapi import APIRouter
+from pandas_profiling import ProfileReport
+from pydantic import parse_obj_as
 
+from app.core.config import Settings
+from app.models.analysis import Analysis
 from app.models.sample import Sample
 from app.models.table import Table
-from app.models.analysis import Analysis
 from app.utils.utils import provide_dataframe
-from pandas_profiling import ProfileReport
-from pandas_profiling.model.table import get_table_stats
-from pydantic import parse_obj_as
 
 settings = Settings()
 
 profile_router = router = APIRouter()
 
+
 @router.get("/profile/raw")
-def provide_raw_profiling(source: str = settings.EXAMPLE_URL, samples_to_show: int = 10):
+def provide_raw_profiling(
+    source: str = settings.EXAMPLE_URL, samples_to_show: int = 10
+):
     """Provide Pandas-Profile for a dataset
 
     Args:
-        source (str, optional): Source of the dataset, as of now only url, csv file path. 
-        Defaults to example_url (https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv).
-        samples_to_show (int, optional): Samples of Dataset rows to display. Defaults to 10.
+        source (str, optional): Source of the dataset, as of now only url, csv file path.  # noqa: E501
+        Defaults to example_url (https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv).  # noqa: E501
+        samples_to_show (int, optional): Samples of Dataset rows to display. Defaults to 10.  # noqa: E501
 
     Returns:
         response (json): Pandas-Profile in json
@@ -51,14 +51,14 @@ def provide_raw_profiling(source: str = settings.EXAMPLE_URL, samples_to_show: i
 
     return json_profile
 
+
 @router.get(
     "/profile/samples/",
     response_model=List[Sample],
     response_model_exclude_none=True,
 )
 def profile_samples(
-    source: str = settings.EXAMPLE_URL, 
-    samples_to_show: int = 10
+    source: str = settings.EXAMPLE_URL, samples_to_show: int = 10
 ):
     """
     Get samples for data
@@ -87,14 +87,13 @@ def profile_samples(
 
     return samples
 
+
 @router.get(
     "/profile/description/table/",
     response_model=Table,
     response_model_exclude_none=True,
 )
-def profile_table(
-    source: str = settings.EXAMPLE_URL
-):
+def profile_table(source: str = settings.EXAMPLE_URL):
     """
     Get table part of pandas profiling for data
     """
@@ -116,20 +115,19 @@ def profile_table(
 
     description = profile.get_description()
 
-    table = parse_obj_as(Table, description['table'])
+    table = parse_obj_as(Table, description["table"])
 
     return table
+
 
 @router.get(
     "/profile/description/analysis/",
     response_model=Analysis,
     response_model_exclude_none=True,
 )
-def profile_table(
-    source: str = settings.EXAMPLE_URL
-):
+def profile_analysis(source: str = settings.EXAMPLE_URL):
     """
-    Get table part of pandas profiling for data
+    Get Analysis part of pandas profiling for data
     """
 
     dataframe = provide_dataframe(source)
@@ -149,6 +147,6 @@ def profile_table(
 
     description = profile.get_description()
 
-    analysis = parse_obj_as(Analysis, description['analysis'])
+    analysis = parse_obj_as(Analysis, description["analysis"])
 
-    return analysis    
+    return analysis

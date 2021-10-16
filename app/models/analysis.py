@@ -1,5 +1,7 @@
-from pydantic.main import BaseModel
 from datetime import datetime, timedelta
+
+from pydantic.main import BaseModel
+
 
 class Analysis(BaseModel):
     title: str

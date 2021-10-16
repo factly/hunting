@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+
 from app.models.types import Types
+
 
 class Table(BaseModel):
     n: int

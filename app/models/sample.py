@@ -1,7 +1,8 @@
 from typing import Optional
 
-from pydantic.main import BaseModel
 from pydantic import Json
+from pydantic.main import BaseModel
+
 
 class Sample(BaseModel):
     id: str

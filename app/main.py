@@ -1,6 +1,4 @@
-import uvicorn
-from fastapi import Depends, FastAPI
-from starlette.requests import Request
+from fastapi import FastAPI
 
 from app.api.api_v1.routers.profile import profile_router
 from app.core.config import Settings

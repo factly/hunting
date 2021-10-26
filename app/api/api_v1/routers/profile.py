@@ -1,33 +1,37 @@
+import datetime
 import json
-from typing import Coroutine, List
-from numpy import bool_
+from typing import List
 
 from fastapi import APIRouter
+from numpy import bool_
+from pandas import DataFrame
 from pandas_profiling import ProfileReport
 from pydantic import parse_obj_as
 
 from app.core.config import Settings
-from app.models.analysis import Analysis
-from app.models.sample import Sample
-from app.models.variables import Variables
 from app.models.alerts import Alerts
-from app.models.scatter import Scatter
-from app.models.table import Table
+from app.models.analysis import Analysis
+from app.models.correlations import Correlations
+from app.models.description import Description
+from app.models.duplicates import Duplicates
 from app.models.missing import Missing
 from app.models.package import Package
-from app.models.duplicates import Duplicates
-from app.models.correlations import Correlations
+from app.models.sample import Sample
+from app.models.scatter import Scatter
+from app.models.table import Table
+from app.models.variables import Variables
 from app.utils.utils import provide_dataframe
 
 settings = Settings()
 
 profile_router = router = APIRouter()
 
+
 def json_conversion_objects(obj):
     """Fix improper objects while creating json
     Function use to convert non-JSON serializable objects to proper format
     Args:
-        obj ([datetime,np.generic]): Object that is passed as value pair to json
+        obj ([datetime,np.generic]): Object required to convert to json
     Returns:
         obj: JSON Serializable object
     """
@@ -37,6 +41,9 @@ def json_conversion_objects(obj):
     #     return obj.item()
     if isinstance(obj, bool_):
         return bool(obj)
+    if isinstance(obj, datetime.datetime):
+        return obj.__str__()
+
 
 @router.get("/profile/raw")
 def provide_raw_profiling(
@@ -173,15 +180,16 @@ def profile_analysis(source: str = settings.EXAMPLE_URL):
 
     return analysis
 
+
 @router.get(
     "/profile/description/alerts",
     response_model=Alerts,
     response_model_exclude_none=True,
 )
 def profile_alerts(source: str = settings.EXAMPLE_URL):
-    
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
         minimal=True,
@@ -189,39 +197,40 @@ def profile_alerts(source: str = settings.EXAMPLE_URL):
         show_variable_description=False,
         progress_bar=False,
     )
-    
-    provided_alerts = profile.get_description().get("alerts",[])
-    
+
+    provided_alerts = profile.get_description().get("alerts", [])
+
     all_alerts = []
     for each_alert in provided_alerts:
         all_alerts.append(f"{each_alert}")
-        
+
     # description = profile.get_description()
     # all_alerts = parse_obj_as(Alerts, description["alerts"])
-    
+
     return all_alerts
+
 
 @router.get(
     "/profile/description/scatter",
-    response_model=Correlations,
+    response_model=Scatter,
     response_model_exclude_none=True,
 )
-def profile_scatter(source: str = settings.EXAMPLE_URL, minimal:bool = True):
-    
+def profile_scatter(source: str = settings.EXAMPLE_URL, minimal: bool = True):
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
-        minimal=True,
+        minimal=minimal,
         # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
-    
+
     description = profile.get_description()
-    
+
     scatter = parse_obj_as(Scatter, description["scatter"])
-    
+
     return scatter
 
 
@@ -230,10 +239,12 @@ def profile_scatter(source: str = settings.EXAMPLE_URL, minimal:bool = True):
     response_model=Correlations,
     response_model_exclude_none=True,
 )
-def profile_correlations(source: str = settings.EXAMPLE_URL, minimal: bool = True):
-    
+def profile_correlations(
+    source: str = settings.EXAMPLE_URL, minimal: bool = True
+):
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
@@ -241,14 +252,14 @@ def profile_correlations(source: str = settings.EXAMPLE_URL, minimal: bool = Tru
         show_variable_description=False,
         progress_bar=False,
     )
-    
-    correlation = profile.get_description().get("correlations",{})
-    
+
+    correlation = profile.get_description().get("correlations", {})
+
     # each correlation was specified as pandas dataframe
     modified_corr = {}
     for each_corr in correlation:
-            modified_corr[each_corr]  = correlation[each_corr].to_json()
-    
+        modified_corr[each_corr] = correlation[each_corr].to_json()
+
     return modified_corr
 
 
@@ -258,9 +269,9 @@ def profile_correlations(source: str = settings.EXAMPLE_URL, minimal: bool = Tru
     response_model_exclude_none=True,
 )
 def profile_missing(source: str = settings.EXAMPLE_URL, minimal: bool = True):
-    
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
@@ -268,11 +279,11 @@ def profile_missing(source: str = settings.EXAMPLE_URL, minimal: bool = True):
         show_variable_description=False,
         progress_bar=False,
     )
-    
+
     description = profile.get_description()
-    
+
     missings = parse_obj_as(Missing, description["missing"])
-    
+
     return missings
 
 
@@ -282,9 +293,9 @@ def profile_missing(source: str = settings.EXAMPLE_URL, minimal: bool = True):
     response_model_exclude_none=True,
 )
 def profile_package(source: str = settings.EXAMPLE_URL, minimal: bool = True):
-    
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
@@ -292,11 +303,11 @@ def profile_package(source: str = settings.EXAMPLE_URL, minimal: bool = True):
         show_variable_description=False,
         progress_bar=False,
     )
-    
+
     description = profile.get_description()
-    
+
     package = parse_obj_as(Package, description["package"])
-    
+
     return package
 
 
@@ -305,10 +316,12 @@ def profile_package(source: str = settings.EXAMPLE_URL, minimal: bool = True):
     response_model=Variables,
     response_model_exclude_none=True,
 )
-def profile_variables(source: str = settings.EXAMPLE_URL, minimal: bool = True):
-    
+def profile_variables(
+    source: str = settings.EXAMPLE_URL, minimal: bool = True
+):
+
     dataframe = provide_dataframe(source)
-    
+
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
@@ -317,8 +330,11 @@ def profile_variables(source: str = settings.EXAMPLE_URL, minimal: bool = True):
         progress_bar=False,
     )
 
-    # few objects are not json serializable and have type : numpy.bool_, using default option
-    variables = json.dumps(profile.get_description()["variables"], default = json_conversion_objects)
+    # few objects are not json serializable and have type : numpy.bool_,
+    # using default option
+    variables = json.dumps(
+        profile.get_description()["variables"], default=json_conversion_objects
+    )
     # variables = parse_obj_as(Package, json.load(description["variables"]))
     mod_var = json.loads(variables)
     return mod_var
@@ -329,8 +345,10 @@ def profile_variables(source: str = settings.EXAMPLE_URL, minimal: bool = True):
     response_model=Duplicates,
     response_model_exclude_none=True,
 )
-def profile_duplicates(source: str = settings.EXAMPLE_URL, minimal: bool = True):
-    
+def profile_duplicates(
+    source: str = settings.EXAMPLE_URL, minimal: bool = True
+):
+
     dataframe = provide_dataframe(source)
     profile = ProfileReport(
         dataframe,
@@ -341,5 +359,64 @@ def profile_duplicates(source: str = settings.EXAMPLE_URL, minimal: bool = True)
     )
 
     duplicates = profile.get_duplicates()
-        
-    return duplicates
+    if isinstance(duplicates, DataFrame):
+        mod_duplicates = duplicates.to_json()
+    else:
+        mod_duplicates = "None"
+    return mod_duplicates
+
+
+@router.get(
+    "/profile/description",
+    response_model=Description,
+    response_model_exclude_none=True,
+)
+def profile_description(
+    source: str = settings.EXAMPLE_URL, minimal: bool = True
+):
+    dataframe = provide_dataframe(source)
+
+    profile = ProfileReport(
+        dataframe,
+        minimal=minimal,
+        # samples={"head": samples_to_show, "tail": samples_to_show},
+        show_variable_description=False,
+        progress_bar=False,
+    )
+    description = profile.get_description()
+
+    # get alerts
+    provided_alerts = profile.get_description().get("alerts", [])
+    all_alerts = []
+    for each_alert in provided_alerts:
+        all_alerts.append(f"{each_alert}")
+
+    # get correlations
+    correlation = profile.get_description().get("correlations", {})
+    modified_corr = {}
+    for each_corr in correlation:
+        modified_corr[each_corr] = correlation[each_corr].to_json()
+
+    variables = json.dumps(
+        profile.get_description()["variables"], default=json_conversion_objects
+    )
+    mod_var = json.loads(variables)
+
+    duplicates = profile.get_duplicates()
+    if isinstance(duplicates, DataFrame):
+        mod_duplicates = duplicates.to_json()
+    else:
+        mod_duplicates = "None"
+
+    desc = {
+        "table": parse_obj_as(Table, description["table"]),
+        "analysis": parse_obj_as(Analysis, description["analysis"]),
+        "alerts": all_alerts,
+        "scatter": parse_obj_as(Scatter, description["scatter"]),
+        "correlations": modified_corr,
+        "missing": parse_obj_as(Missing, description["missing"]),
+        "package": parse_obj_as(Package, description["package"]),
+        "variables": mod_var,
+        "duplicates": mod_duplicates,
+    }
+    return desc

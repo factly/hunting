@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Json
 from typing import Dict
 
+from pydantic import BaseModel
+
+
 class Variables(BaseModel):
-    __root__ : Dict
+    __root__: Dict

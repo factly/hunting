@@ -1,14 +1,10 @@
-import datetime
 import json
+from os import environ
 from typing import List
 
 from fastapi import APIRouter
-from numpy import bool_
-from pandas import DataFrame
 from pandas_profiling import ProfileReport
-from pydantic import parse_obj_as
 
-from app.core.config import Settings
 from app.models.alerts import Alerts
 from app.models.analysis import Analysis
 from app.models.correlations import Correlations
@@ -20,34 +16,17 @@ from app.models.sample import Sample
 from app.models.scatter import Scatter
 from app.models.table import Table
 from app.models.variables import Variables
-from app.utils.utils import provide_dataframe
-
-settings = Settings()
+from app.utils.profile_segments import ProfileSegments
+from app.utils.util_functions import provide_dataframe
 
 profile_router = router = APIRouter()
 
 
-def json_conversion_objects(obj):
-    """Fix improper objects while creating json
-    Function use to convert non-JSON serializable objects to proper format
-    Args:
-        obj ([datetime,np.generic]): Object required to convert to json
-    Returns:
-        obj: JSON Serializable object
-    """
-    # if isinstance(obj, datetime.datetime):
-    #     return obj.__str__()
-    # if isinstance(obj, np.generic):
-    #     return obj.item()
-    if isinstance(obj, bool_):
-        return bool(obj)
-    if isinstance(obj, datetime.datetime):
-        return obj.__str__()
-
-
-@router.get("/profile/raw")
-def provide_raw_profiling(
-    source: str = settings.EXAMPLE_URL, samples_to_show: int = 10
+@router.get("/profile/raw/")
+async def provide_raw_profiling(
+    source: str = environ["EXAMPLE_URL"],
+    samples_to_show: int = 10,
+    minimal: bool = True,
 ):
     """Provide Pandas-Profile for a dataset
 
@@ -69,7 +48,7 @@ def provide_raw_profiling(
 
     profile = ProfileReport(
         dataframe,
-        minimal=False,
+        minimal=minimal,
         samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
@@ -77,7 +56,6 @@ def provide_raw_profiling(
 
     # replacing all NaN Values to "NA" as NaN throws error
     json_profile = json.loads(profile.to_json().replace("NaN", '"NA"'))
-
     return json_profile
 
 
@@ -86,8 +64,8 @@ def provide_raw_profiling(
     response_model=List[Sample],
     response_model_exclude_none=True,
 )
-def profile_samples(
-    source: str = settings.EXAMPLE_URL, samples_to_show: int = 10
+async def profile_samples(
+    source: str = environ["EXAMPLE_URL"], samples_to_show: int = 10
 ):
     """
     Get samples for data
@@ -108,11 +86,9 @@ def profile_samples(
         progress_bar=False,
     )
 
-    samples = profile.get_sample()
-
-    # convert `data` filed from `dataframe` to `json`
-    for sample in samples:
-        sample.data = sample.data.to_json()
+    # use `ProfileSegments` to get table part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    samples = profile_segment.samples()
 
     return samples
 
@@ -122,7 +98,7 @@ def profile_samples(
     response_model=Table,
     response_model_exclude_none=True,
 )
-def profile_table(source: str = settings.EXAMPLE_URL):
+async def profile_table(source: str = environ["EXAMPLE_URL"]):
     """
     Get table part of pandas profiling for data
     """
@@ -142,9 +118,9 @@ def profile_table(source: str = settings.EXAMPLE_URL):
         progress_bar=False,
     )
 
-    description = profile.get_description()
-
-    table = parse_obj_as(Table, description["table"])
+    # use `ProfileSegments` to get table part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    table = profile_segment.table()
 
     return table
 
@@ -154,93 +130,82 @@ def profile_table(source: str = settings.EXAMPLE_URL):
     response_model=Analysis,
     response_model_exclude_none=True,
 )
-def profile_analysis(source: str = settings.EXAMPLE_URL):
+async def profile_analysis(source: str = environ["EXAMPLE_URL"]):
     """
     Get Analysis part of pandas profiling for data
     """
 
     dataframe = provide_dataframe(source)
 
-    # WHAT?: Change sample sizes based on number of rows
-    # WHY?: Fow smaller dataset number of samples to
-    # if dataframe.shape[0] < 100:
-    #     samples_to_show = 5
-
     profile = ProfileReport(
         dataframe,
         minimal=True,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    description = profile.get_description()
-
-    analysis = parse_obj_as(Analysis, description["analysis"])
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    analysis = profile_segment.analysis()
 
     return analysis
 
 
 @router.get(
-    "/profile/description/alerts",
+    "/profile/description/alerts/",
     response_model=Alerts,
     response_model_exclude_none=True,
 )
-def profile_alerts(source: str = settings.EXAMPLE_URL):
+async def profile_alerts(source: str = environ["EXAMPLE_URL"]):
 
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
         dataframe,
         minimal=True,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    provided_alerts = profile.get_description().get("alerts", [])
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    alerts = profile_segment.alerts()
 
-    all_alerts = []
-    for each_alert in provided_alerts:
-        all_alerts.append(f"{each_alert}")
-
-    # description = profile.get_description()
-    # all_alerts = parse_obj_as(Alerts, description["alerts"])
-
-    return all_alerts
+    return alerts
 
 
 @router.get(
-    "/profile/description/scatter",
+    "/profile/description/scatter/",
     response_model=Scatter,
     response_model_exclude_none=True,
 )
-def profile_scatter(source: str = settings.EXAMPLE_URL, minimal: bool = True):
+async def profile_scatter(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+):
 
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    description = profile.get_description()
-
-    scatter = parse_obj_as(Scatter, description["scatter"])
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    scatter = profile_segment.scatter()
 
     return scatter
 
 
 @router.get(
-    "/profile/description/correlations",
+    "/profile/description/correlations/",
     response_model=Correlations,
     response_model_exclude_none=True,
 )
-def profile_correlations(
-    source: str = settings.EXAMPLE_URL, minimal: bool = True
+async def profile_correlations(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -248,76 +213,74 @@ def profile_correlations(
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    correlation = profile.get_description().get("correlations", {})
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    correlations = profile_segment.correlations()
 
-    # each correlation was specified as pandas dataframe
-    modified_corr = {}
-    for each_corr in correlation:
-        modified_corr[each_corr] = correlation[each_corr].to_json()
-
-    return modified_corr
+    return correlations
 
 
 @router.get(
-    "/profile/description/missing",
+    "/profile/description/missing/",
     response_model=Missing,
     response_model_exclude_none=True,
 )
-def profile_missing(source: str = settings.EXAMPLE_URL, minimal: bool = True):
+async def profile_missing(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+):
 
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    description = profile.get_description()
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    missing = profile_segment.missing()
 
-    missings = parse_obj_as(Missing, description["missing"])
-
-    return missings
+    return missing
 
 
 @router.get(
-    "/profile/description/package",
+    "/profile/description/package/",
     response_model=Package,
     response_model_exclude_none=True,
 )
-def profile_package(source: str = settings.EXAMPLE_URL, minimal: bool = True):
+async def profile_package(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+):
 
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    description = profile.get_description()
-
-    package = parse_obj_as(Package, description["package"])
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    package = profile_segment.package()
 
     return package
 
 
 @router.get(
-    "/profile/description/variables",
+    "/profile/description/variables/",
     response_model=Variables,
     response_model_exclude_none=True,
 )
-def profile_variables(
-    source: str = settings.EXAMPLE_URL, minimal: bool = True
+async def profile_variables(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -325,98 +288,69 @@ def profile_variables(
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    # few objects are not json serializable and have type : numpy.bool_,
-    # using default option
-    variables = json.dumps(
-        profile.get_description()["variables"], default=json_conversion_objects
-    )
-    # variables = parse_obj_as(Package, json.load(description["variables"]))
-    mod_var = json.loads(variables)
-    return mod_var
+    # use `ProfileSegments` to get analysis part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    variables = profile_segment.variables()
+
+    return variables
 
 
 @router.get(
-    "/profile/description/duplicates",
+    "/profile/description/duplicates/",
     response_model=Duplicates,
     response_model_exclude_none=True,
 )
-def profile_duplicates(
-    source: str = settings.EXAMPLE_URL, minimal: bool = True
+async def profile_duplicates(
+    source: str = environ["EXAMPLE_URL"], minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
+
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
 
-    duplicates = profile.get_duplicates()
-    if isinstance(duplicates, DataFrame):
-        mod_duplicates = duplicates.to_json()
-    else:
-        mod_duplicates = "None"
-    return mod_duplicates
+    # use `ProfileSegments` to get duplicates part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    duplicates = profile_segment.duplicates()
+
+    return duplicates
 
 
 @router.get(
-    "/profile/description",
+    "/profile/description/",
     response_model=Description,
     response_model_exclude_none=True,
 )
-def profile_description(
-    source: str = settings.EXAMPLE_URL, minimal: bool = True
+async def profile_description(
+    source: str = environ["EXAMPLE_URL"],
+    minimal: bool = True,
+    samples_to_show: int = 10,
 ):
     dataframe = provide_dataframe(source)
+
+    # WHAT?: Change sample sizes based on number of rows
+    # WHY?: Fow smaller dataset number of samples to
+    if dataframe.shape[0] < 100:
+        samples_to_show = 5
 
     profile = ProfileReport(
         dataframe,
         minimal=minimal,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
+        samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
         progress_bar=False,
     )
-    description = profile.get_description()
 
-    # get alerts
-    provided_alerts = profile.get_description().get("alerts", [])
-    all_alerts = []
-    for each_alert in provided_alerts:
-        all_alerts.append(f"{each_alert}")
+    # use `ProfileSegments` to get duplicates part of pandas profiling
+    profile_segment = ProfileSegments(profile)
+    description = profile_segment.description()
 
-    # get correlations
-    correlation = profile.get_description().get("correlations", {})
-    modified_corr = {}
-    for each_corr in correlation:
-        modified_corr[each_corr] = correlation[each_corr].to_json()
-
-    variables = json.dumps(
-        profile.get_description()["variables"], default=json_conversion_objects
-    )
-    mod_var = json.loads(variables)
-
-    duplicates = profile.get_duplicates()
-    if isinstance(duplicates, DataFrame):
-        mod_duplicates = duplicates.to_json()
-    else:
-        mod_duplicates = "None"
-
-    desc = {
-        "table": parse_obj_as(Table, description["table"]),
-        "analysis": parse_obj_as(Analysis, description["analysis"]),
-        "alerts": all_alerts,
-        "scatter": parse_obj_as(Scatter, description["scatter"]),
-        "correlations": modified_corr,
-        "missing": parse_obj_as(Missing, description["missing"]),
-        "package": parse_obj_as(Package, description["package"]),
-        "variables": mod_var,
-        "duplicates": mod_duplicates,
-    }
-    return desc
+    return description

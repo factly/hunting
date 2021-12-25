@@ -15,37 +15,10 @@ from app.utils.util_functions import (
 s3_event_router = router = APIRouter()
 
 
-# @router.get("/to_s3/")
-# async def to_s3(
-#     action: List[str] = Query(
-#         ["analysis"],
-#         description="Actions represents diifferent segments \
-# of Pandas Profiling Report",
-#     ),
-#     source: str = Query(
-#         environ["EXAMPLE_URL"],
-#         description="Source URL for the dataset",
-#         title="Source URL",
-#     ),
-#     minimal: bool = True,
-#     file_name: str = "output.json",
-# ):
-#     """This Function takes list of actions to be
-#           performed on the dataset and returns
-#           hunting profile
-
-#     args:
-#     action : action or list of action to performed on dataset
-#                 [samples, tables, analysis, alerts, description,
-#                   correlation, missing, package, variable,
-#                   duplicates, description]
-#     """
-#     return await _to_s3(action, source, minimal, file_name)
-
-
 @router.get(
     "/to_s3/bulk/from_file_urls/",
     summary="Bulk upload to S3 bucket from file urls",
+    status_code=status.HTTP_202_ACCEPTED,
 )
 async def to_s3_bulk_from_file_urls(
     bg_tasks: BackgroundTasks,
@@ -90,6 +63,7 @@ async def to_s3_bulk_from_file_urls(
     "/to_s3/bulk/from_s3/",
     summary="Bulk upload Profiles to S3 bucket\
         for datasets present in a S3 folder",
+    status_code=status.HTTP_202_ACCEPTED,
 )
 async def to_s3_bulk_upload_folder(
     bg_tasks: BackgroundTasks,

@@ -1,7 +1,6 @@
 import datetime
 import json
 from io import BytesIO
-from os import environ
 from pathlib import Path
 
 import numpy as np
@@ -12,10 +11,11 @@ from numpy import bool_
 from pandas import read_csv
 from pandas_profiling import ProfileReport
 
+from app.core.config import Settings
 from app.utils.profile_segments import ProfileSegments
-from app.utils.tasks_functions import create_new_task, upadate_tasks_report
+from app.utils.tasks_functions import create_new_task, update_tasks_report
 
-# setting = Settings()
+setting = Settings()
 
 
 def json_conversion_objects(obj):
@@ -37,6 +37,20 @@ def json_conversion_objects(obj):
 def provide_dataframe(
     file_url: str, source="url", s3_client: Minio = None, bucket: str = None
 ):
+    """Functionality to provide dataframe from various sources
+
+    Args:
+        file_url (str): URL to the file to be read
+        source (str, optional): Various sources from where file can be read.\
+                                Defaults to "url".
+        s3_client (Minio, optional): Minio Client Object to bucket ,\
+                                if source is "s3". Defaults to None.
+        bucket (str, optional): Name of bucket under which file is present.\
+                                Defaults to None.
+
+    Returns:
+        [type]: [description]
+    """
     # read any thing and provide proper dataframe instance
     # link : str, validate as proper url
 
@@ -53,6 +67,21 @@ def provide_dataframe(
 
 
 async def _create_minio_client(endpoint, key, secret, secure):
+    """Functionality to create Minio Client
+
+    Args:
+        endpoint (str): End point to connect to Minio
+        key (str): Access key
+        secret (str): Password / Secret key
+        secure (Bool): Connect to Minio securely or not
+
+    Raises:
+        HTTPException: Failed to create Minio Client,\
+                due to improper parameters
+
+    Returns:
+        Minio Client: Minio connection clients
+    """
     try:
         minio_client = Minio(
             endpoint=endpoint,
@@ -63,8 +92,8 @@ async def _create_minio_client(endpoint, key, secret, secure):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not create Minio Client, \
-                Exception with message {e}",
+            detail="Could not create Minio Client",
+            headers={"error_message": f"{e}"},
         )
     else:
         return minio_client
@@ -73,10 +102,23 @@ async def _create_minio_client(endpoint, key, secret, secure):
 async def _list_files_under_s3_folder(
     source_client, source_folder_path, format=None
 ):
+    """Functionality to list down all files present in s3 bucket\
+            with provided prefix
+
+    Args:
+        source_client (Minio-Client): Minio Client for the source bucket
+        source_folder_path (str): folder path to list files, this is a prefix
+        format (str, optional): File extension for files to consider.\
+                                Defaults to None.
+
+    Returns:
+        List[Minio Object]: List of all files present in the bucket ,\
+                            with provided prefix and extension
+    """
     # get list of files under the source folder
     objects = list(
         source_client.list_objects(
-            environ["S3_BUCKET"], recursive=True, prefix=source_folder_path
+            setting.S3_BUCKET, recursive=True, prefix=source_folder_path
         )
     )
 
@@ -95,11 +137,23 @@ async def _list_files_under_s3_folder(
 async def _perform_hunting(
     path, actions, minimal, minio_client, files_sources: str
 ):
+    """Functionality to perform hunting on the provided file
+
+    Args:
+        path (str): source location of file, could be url or s3 file path
+        actions (str): Various parts of json profiles required
+        minimal (bool): Provide minimal profile or not
+        minio_client (Minio Client): Minio Client connected to source bucket
+        files_sources (str): Provide source of file, could be "url" or "s3"
+
+    Returns:
+        Dict: hunting response in json format
+    """
     # get dataframe from source
     dataframe = provide_dataframe(
         path,
         source=files_sources,
-        bucket=environ["S3_BUCKET"],
+        bucket=setting.S3_BUCKET,
         s3_client=minio_client,
     )
 
@@ -125,20 +179,25 @@ async def _perform_hunting(
 async def _put_profiles_to_destination(
     path, destination, profile_report, minio_client
 ):
-
+    """Functionality to put profiles to destination"""
     # destination file_path is made up of source folder structure and file_name
-    file_path = Path(path).with_suffix(".json")
+    file_path = Path(path)
+    file_path = file_path.with_name(f"hunting_{file_path.name}").with_suffix(
+        ".json"
+    )
     # dest_folder_structure = path.split(source)[-1].lstrip("/")
-
-    destination_file_path = destination + "/" + str(file_path)
-
-    # make buffer from response received, This bubber is saved to s3
+    destination_file_path = (destination + "/" + str(file_path)).strip("/")
+    # make buffer from response received, This buffer is saved to s3
     json_compatible_data = jsonable_encoder(profile_report)
+    # converting json response to Bytes object
     out_buffer = BytesIO(json.dumps(json_compatible_data).encode("utf-8"))
+    # put buffer bytes object to destination
+    if not minio_client.bucket_exists(setting.S3_BUCKET):
+        minio_client.make_bucket(setting.S3_BUCKET)
     minio_client.put_object(
         object_name=destination_file_path,
         data=out_buffer,
-        bucket_name=environ["S3_BUCKET"],
+        bucket_name=setting.S3_BUCKET_TARGET,
         length=-1,
         part_size=10485760,
     )
@@ -149,12 +208,25 @@ async def _put_profiles_to_destination(
 async def _to_s3_bulk_from_file_urls(
     sources, actions, minimal, destination, task_id
 ):
-    target_minio_client = await _create_minio_client(
-        endpoint=environ["S3_ENDPOINT_TARGET"],
-        key=environ["S3_KEY_TARGET"],
-        secret=environ["S3_SECRET_TARGET"],
-        secure=eval(f'{environ["S3_SECURE_TARGET"]}'),
-    )
+    """Functionality to perform hunting on the provided file.\
+        This functions serves as background process
+
+    Args:
+        sources (List[str]): List of source file urls
+        actions (List[str]): Various actions to perform on the dataframe
+        minimal (Bool): Provide minimal profile or not
+        destination (str): Folder name of path within Target bucket
+        task_id (str): Task id of the task
+    """
+    try:
+        target_minio_client = await _create_minio_client(
+            endpoint=setting.S3_ENDPOINT_TARGET,
+            key=setting.S3_KEY_TARGET,
+            secret=setting.S3_SECRET_TARGET,
+            secure=setting.S3_SECURE_TARGET,
+        )
+    except Exception as e:
+        raise f"{e}"
 
     _ = await create_new_task(id=task_id, file_count=len(sources))
 
@@ -180,7 +252,7 @@ async def _to_s3_bulk_from_file_urls(
             error = True
             destination_file_path = None
         finally:
-            await upadate_tasks_report(
+            await update_tasks_report(
                 source_file_path=source,
                 success_file_path=destination_file_path,
                 error=error,
@@ -192,20 +264,35 @@ async def _to_s3_bulk_from_file_urls(
 async def _bulk_s3_folder(
     source_folder_path, actions, destination, format, task_id, minimal
 ):
-    # create a minio client
-    source_minio_client = await _create_minio_client(
-        endpoint=environ["S3_ENDPOINT"],
-        key=environ["S3_KEY"],
-        secret=environ["S3_SECRET"],
-        secure=eval(f'{environ["S3_SECURE"]}'),
-    )
+    """Functionality to perform hunting on the provided file under S3 bucket.\
+        This functions serves as background process
 
-    target_minio_client = await _create_minio_client(
-        endpoint=environ["S3_ENDPOINT_TARGET"],
-        key=environ["S3_KEY_TARGET"],
-        secret=environ["S3_SECRET_TARGET"],
-        secure=eval(f'{environ["S3_SECURE_TARGET"]}'),
-    )
+    Args:
+        source_folder_path (str): Folder path under source bucket ,\
+                                    where datasets are present
+        actions (List[str]): Various actions to perform on the dataframe
+        minimal (Bool): Provide minimal profile or not
+        destination (str): Folder name of path within Target bucket
+        task_id (str): Task id of the task
+        format (str): File Extension for file types to consider
+    """
+    # create a minio client
+    try:
+        source_minio_client = await _create_minio_client(
+            endpoint=setting.S3_ENDPOINT,
+            key=setting.S3_KEY,
+            secret=setting.S3_SECRET,
+            secure=setting.S3_SECURE,
+        )
+
+        target_minio_client = await _create_minio_client(
+            endpoint=setting.S3_ENDPOINT_TARGET,
+            key=setting.S3_KEY_TARGET,
+            secret=setting.S3_SECRET_TARGET,
+            secure=setting.S3_SECURE_TARGET,
+        )
+    except Exception as e:
+        raise f"{e}"
     # create task ID
     datasets = await _list_files_under_s3_folder(
         source_minio_client, source_folder_path, format=format
@@ -238,7 +325,7 @@ async def _bulk_s3_folder(
             destination_file_path = None
             # add the destination file path to the task report
         finally:
-            await upadate_tasks_report(
+            await update_tasks_report(
                 source_file_path=each_dataset.object_name,
                 success_file_path=destination_file_path,
                 error=error,

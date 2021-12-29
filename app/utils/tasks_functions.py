@@ -52,7 +52,7 @@ async def create_new_task(
     return task
 
 
-async def upadate_tasks_report(
+async def update_tasks_report(
     source_file_path: str,
     success_file_path: Union[str, None],
     error: bool,
@@ -76,8 +76,9 @@ async def upadate_tasks_report(
     # load the json file
     try:
         task_details = json.load(open(temp_folder / f"{task_id}.json"))
-    except FileNotFoundError:
-        print(f"TASK ID: {task_id} not found")
+    except FileNotFoundError as e:
+        print(f"{e}")
+        raise
     else:
         if not error:
             # update the task details

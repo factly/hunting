@@ -1,10 +1,10 @@
 import json
-from os import environ
 from typing import List
 
 from fastapi import APIRouter
 from pandas_profiling import ProfileReport
 
+from app.core.config import Settings
 from app.models.alerts import Alerts
 from app.models.analysis import Analysis
 from app.models.correlations import Correlations
@@ -20,11 +20,12 @@ from app.utils.profile_segments import ProfileSegments
 from app.utils.util_functions import provide_dataframe
 
 profile_router = router = APIRouter()
+setting = Settings()
 
 
 @router.get("/profile/raw/")
 async def provide_raw_profiling(
-    source: str = environ["EXAMPLE_URL"],
+    source: str = setting.EXAMPLE_URL,
     samples_to_show: int = 10,
     minimal: bool = True,
 ):
@@ -65,7 +66,7 @@ async def provide_raw_profiling(
     response_model_exclude_none=True,
 )
 async def profile_samples(
-    source: str = environ["EXAMPLE_URL"], samples_to_show: int = 10
+    source: str = setting.EXAMPLE_URL, samples_to_show: int = 10
 ):
     """
     Get samples for data
@@ -98,7 +99,7 @@ async def profile_samples(
     response_model=Table,
     response_model_exclude_none=True,
 )
-async def profile_table(source: str = environ["EXAMPLE_URL"]):
+async def profile_table(source: str = setting.EXAMPLE_URL):
     """
     Get table part of pandas profiling for data
     """
@@ -130,7 +131,7 @@ async def profile_table(source: str = environ["EXAMPLE_URL"]):
     response_model=Analysis,
     response_model_exclude_none=True,
 )
-async def profile_analysis(source: str = environ["EXAMPLE_URL"]):
+async def profile_analysis(source: str = setting.EXAMPLE_URL):
     """
     Get Analysis part of pandas profiling for data
     """
@@ -156,7 +157,7 @@ async def profile_analysis(source: str = environ["EXAMPLE_URL"]):
     response_model=Alerts,
     response_model_exclude_none=True,
 )
-async def profile_alerts(source: str = environ["EXAMPLE_URL"]):
+async def profile_alerts(source: str = setting.EXAMPLE_URL):
 
     dataframe = provide_dataframe(source)
 
@@ -180,7 +181,7 @@ async def profile_alerts(source: str = environ["EXAMPLE_URL"]):
     response_model_exclude_none=True,
 )
 async def profile_scatter(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -205,7 +206,7 @@ async def profile_scatter(
     response_model_exclude_none=True,
 )
 async def profile_correlations(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -230,7 +231,7 @@ async def profile_correlations(
     response_model_exclude_none=True,
 )
 async def profile_missing(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -255,7 +256,7 @@ async def profile_missing(
     response_model_exclude_none=True,
 )
 async def profile_package(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -280,7 +281,7 @@ async def profile_package(
     response_model_exclude_none=True,
 )
 async def profile_variables(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -305,7 +306,7 @@ async def profile_variables(
     response_model_exclude_none=True,
 )
 async def profile_duplicates(
-    source: str = environ["EXAMPLE_URL"], minimal: bool = True
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
     dataframe = provide_dataframe(source)
@@ -330,7 +331,7 @@ async def profile_duplicates(
     response_model_exclude_none=True,
 )
 async def profile_description(
-    source: str = environ["EXAMPLE_URL"],
+    source: str = setting.EXAMPLE_URL,
     minimal: bool = True,
     samples_to_show: int = 10,
 ):

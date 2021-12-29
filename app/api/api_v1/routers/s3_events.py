@@ -1,10 +1,10 @@
 import json
-from os import environ
 from pathlib import Path
 from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 
+from app.core.config import Settings
 from app.models.tasks import Task
 from app.utils.tasks_functions import create_task_id
 from app.utils.util_functions import (
@@ -13,6 +13,7 @@ from app.utils.util_functions import (
 )
 
 s3_event_router = router = APIRouter()
+setting = Settings()
 
 
 @router.get(
@@ -23,11 +24,11 @@ s3_event_router = router = APIRouter()
 async def to_s3_bulk_from_file_urls(
     bg_tasks: BackgroundTasks,
     sources: List[str] = Query(
-        [environ["EXAMPLE_URL"]], description="Source URLs for the dataset"
+        [setting.EXAMPLE_URL], description="Source URLs for the dataset"
     ),
     actions: List[str] = Query(
-        ["analysis"],
-        description="Actions represents diifferent segments \
+        ["description"],
+        description="Actions represents different segments \
             of Pandas Profiling Report",
     ),
     minimal: bool = Query(True, description="Minimal or not"),
@@ -54,9 +55,7 @@ async def to_s3_bulk_from_file_urls(
         task_id=task_id,
     )
 
-    return {
-        "message": f"Process Running in Background with TASK ID : {task_id}"
-    }
+    return {"task_id": task_id, "message": "Process Running in Background"}
 
 
 @router.get(
@@ -68,14 +67,14 @@ async def to_s3_bulk_from_file_urls(
 async def to_s3_bulk_upload_folder(
     bg_tasks: BackgroundTasks,
     source_folder_path: str = Query(
-        None, description="Folder path where all datastes are present"
+        None, description="Folder path where all datasets are present"
     ),
     file_format: str = Query("csv", description="File format of the files"),
     destination_folder_path: str = Query(
-        "destination",
-        description="Folder path where all datastes are to be uploaded",
+        "",
+        description="Folder path where all datasets are to be uploaded",
     ),
-    actions: List[str] = Query(["analysis"]),
+    actions: List[str] = Query(["description"]),
     minimal: bool = Query(True, description="Minimal or not"),
     task_id_prefix: str = "bulk_s3_folder",
 ):
@@ -94,9 +93,7 @@ async def to_s3_bulk_upload_folder(
         minimal=minimal,
         task_id=task_id,
     )
-    return {
-        "message": f"Process Running in Background with TASK ID : {task_id}"
-    }
+    return {"task_id": task_id, "message": "Process Running in Background"}
 
 
 @router.get("/bulk/task/id/", summary="Get all Tasks Ids")

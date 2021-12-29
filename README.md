@@ -61,8 +61,8 @@ Or use the following command to stop the application, and remove all the contain
     Example : 
       ```
       [
-        "https://github.com/curran/data/blob/gh-pages/Rdatasets/csv/Ecdat/Airline.csv",
-        "https://github.com/curran/data/blob/gh-pages/Rdatasets/csv/Ecdat/Bids.csv",
+        "https://raw.githubusercontent.com/curran/data/gh-pages/Rdatasets/csv/Ecdat/Airline.csv",
+        "https://raw.githubusercontent.com/curran/data/gh-pages/Rdatasets/csv/Ecdat/Bids.csv",
         "https://raw.githubusercontent.com/curran/data/gh-pages/Rdatasets/csv/Ecdat/Car.csv"
       ]
       ```

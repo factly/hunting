@@ -13,17 +13,10 @@ app = FastAPI(
     title=settings.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api"
 )
 
-
-origins = [
-    "http://127.0.0.1:8000",
-    "http://localhost",
-    "http://localhost:8000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=["*"],
+    allow_origins=settings.CORS_ORIGINS,
+    allow_methods=settings.CORS_METHODS,
     allow_headers=["*"],
 )
 

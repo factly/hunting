@@ -41,13 +41,16 @@ async def create_new_task(
     Returns:
         Task: Task object with provided details
     """
-    task = Task(
-        task_id=id,
-        number_of_files=file_count,
-        completed=Completed(number_of_files=0, names_of_file=[]),
-        error=Error(number_of_files=0, names_of_file=[]),
-    )
-    with open(TASK_FOLDER / f"{id}.json", "w") as task_report:
+    task_file_path = TASK_FOLDER / f"{id}.json"
+    with open(task_file_path, "w") as task_report:
+        task = Task(
+            task_id=id,
+            start_time=task_file_path.stat().st_ctime,
+            process_time=0,
+            number_of_files=file_count,
+            completed=Completed(number_of_files=0, names_of_file=[]),
+            error=Error(number_of_files=0, names_of_file=[]),
+        )
         json.dump(task.dict(), task_report)
     return task
 
@@ -75,7 +78,8 @@ async def update_tasks_report(
     """
     # load the json file
     try:
-        task_details = json.load(open(task_folder / f"{task_id}.json"))
+        task_file_path = task_folder / f"{task_id}.json"
+        task_details = json.load(open(task_file_path))
     except FileNotFoundError as e:
         print(f"{e}")
         raise
@@ -98,24 +102,34 @@ async def update_tasks_report(
                 ).dict()
             )
         # write the task details to the json file
-        with open(task_folder / f"{task_id}.json", "w") as task_report:
+        with open(task_file_path, "w") as task_report:
+            # write the updated time for task details
+            # new process time is difference between \
+            # current access time and start time
+            task_details["process_time"] = (
+                task_file_path.stat().st_atime - task_details["start_time"]
+            )
+
             json.dump(task_details, task_report)
 
 
 async def get_all_tasks(
+    skip: int,
     limit: int,
 ):
     """Functionality to get all tasks."""
     # consider all files present inside the Task Folder
-    task_id_files = [each_file for each_file in TASK_FOLDER.glob("*.json")]
-
-    # check if limit is lower or number of tasks
-    limit = min(limit, len(task_id_files))
+    # using Pathlib stat function to get metadata of each file
+    # the apply appropriate sorting on the basis of the recent \
+    # modification time of the file
+    task_id_files = sorted(
+        TASK_FOLDER.iterdir(),
+        key=lambda file: file.stat().st_mtime,
+        reverse=True,
+    )[skip:limit]
 
     # read all tasks and then return
-    tasks = [
-        json.load(each_file.open()) for each_file in task_id_files[:limit]
-    ]
+    tasks = [json.load(each_file.open()) for each_file in task_id_files]
     return tasks
 
 

@@ -102,12 +102,12 @@ async def to_s3_bulk_upload_folder(
     response_model=List[Task],
     response_model_exclude_none=True,
 )
-async def get_bg_tasks(limit: int = 10):
+async def get_bg_tasks(skip: int = 0, limit: int = 10):
     """
     Functionality to retrieve all tasks ids of the background processed evoked
     """
 
-    all_tasks = await get_all_tasks(limit=limit)
+    all_tasks = await get_all_tasks(skip=skip, limit=limit)
 
     return all_tasks
 

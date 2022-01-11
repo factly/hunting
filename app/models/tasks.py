@@ -27,35 +27,8 @@ class Error(BaseModel):
 
 class Task(BaseModel):
     task_id: str
+    start_time: float
+    process_time: float
     number_of_files: int
     completed: Completed
     error: Error
-
-
-"""
-Mentioed is the format of json
-{
-    "task_id": "str",
-    "number_of_files": 2,
-    "completed": {
-        "number_of_files": 2,
-        "names_of_file":[
-            {
-                "input_file_name": "input name",
-                "output_file_name": "output name"
-            },
-            {
-                "input_file_name": "input name",
-                "output_file_name": "output name"
-            }
-        ]
-    },
-    "error": {
-        "number_of_files" : 2,
-        "names_of_file": [
-            "file1",
-            "file2"
-            ]
-    }
-}
-"""

@@ -1,9 +1,10 @@
 import json
+import math
 import uuid
 from pathlib import Path, PosixPath
 from typing import Union
 
-from app.models.tasks import (
+from app.models.task import (
     Completed,
     Error,
     NamesOfFailedFileItem,
@@ -126,11 +127,19 @@ async def get_all_tasks(
         TASK_FOLDER.iterdir(),
         key=lambda file: file.stat().st_mtime,
         reverse=True,
-    )[skip:limit]
-
+    )
+    total_tasks = len(task_id_files)
+    # Rounds a number up to the nearest integer
+    maximum_page_size = math.ceil(total_tasks / limit)
     # read all tasks and then return
-    tasks = [json.load(each_file.open()) for each_file in task_id_files]
-    return tasks
+    tasks = [
+        json.load(each_file.open()) for each_file in task_id_files[skip:limit]
+    ]
+    return {
+        "total_tasks": total_tasks,
+        "maximum_page_size": maximum_page_size,
+        "tasks": tasks,
+    }
 
 
 async def get_task_by_id(

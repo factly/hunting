@@ -30,9 +30,8 @@ async def to_s3_bulk_from_file_urls(
     sources: List[str] = Query(
         [setting.EXAMPLE_URL], description="Source URLs for the dataset"
     ),
-    actions: List[str] = Query(
-        type=ProfileActions,
-        default=[ProfileActions.SAMPLES, ProfileActions.ANALYSIS],
+    actions: List[ProfileActions] = Query(
+        default=[ProfileActions.ANALYSIS, ProfileActions.TABLE],
         description="Actions represents different segments \
             of Pandas Profiling Report",
     ),
@@ -76,7 +75,11 @@ async def to_s3_bulk_upload_folder(
         "",
         description="Folder path where all datasets are to be uploaded",
     ),
-    actions: List[str] = Query(["description"]),
+    actions: List[ProfileActions] = Query(
+        default=[ProfileActions.ANALYSIS, ProfileActions.TABLE],
+        description="Actions represents different segments \
+            of Pandas Profiling Report",
+    ),
     minimal: bool = Query(True, description="Minimal or not"),
 ):
     """

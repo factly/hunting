@@ -1,9 +1,10 @@
 import json
+import math
 import uuid
 from pathlib import Path, PosixPath
 from typing import Union
 
-from app.models.tasks import (
+from app.models.task import (
     Completed,
     Error,
     NamesOfFailedFileItem,
@@ -11,11 +12,11 @@ from app.models.tasks import (
     Task,
 )
 
-TEMP_FOLDER = Path(__file__).resolve().parents[2] / "temp"
-TEMP_FOLDER.mkdir(exist_ok=True, parents=True)
+TASK_FOLDER = Path(__file__).resolve().parents[2] / "task"
+TASK_FOLDER.mkdir(exist_ok=True, parents=True)
 
 
-async def create_task_id(prefix: str = "bulk_to_s3"):
+async def create_task_id():
     """Functionality to provide a unique task id.
 
     Args:
@@ -25,14 +26,14 @@ async def create_task_id(prefix: str = "bulk_to_s3"):
     Returns:
         str: Uniquely generated uuid
     """
-    return f"{prefix}_{str(uuid.uuid4())}"
+    return f"{str(uuid.uuid4())}"
 
 
 async def create_new_task(
     id: str,
     file_count: int,
 ) -> Task:
-    """Functionality to create a new task, and save its report to the temp folder.
+    """Functionality to create a new task, and save its report to the task folder.
 
     Args:
         id (str): Unique task id
@@ -41,13 +42,16 @@ async def create_new_task(
     Returns:
         Task: Task object with provided details
     """
-    task = Task(
-        task_id=id,
-        number_of_files=file_count,
-        completed=Completed(number_of_files=0, names_of_file=[]),
-        error=Error(number_of_files=0, names_of_file=[]),
-    )
-    with open(TEMP_FOLDER / f"{id}.json", "w") as task_report:
+    task_file_path = TASK_FOLDER / f"{id}.json"
+    with open(task_file_path, "w") as task_report:
+        task = Task(
+            task_id=id,
+            start_time=task_file_path.stat().st_ctime,
+            process_time=0,
+            number_of_files=file_count,
+            completed=Completed(number_of_files=0, names_of_file=[]),
+            error=Error(number_of_files=0, names_of_file=[]),
+        )
         json.dump(task.dict(), task_report)
     return task
 
@@ -58,7 +62,7 @@ async def update_tasks_report(
     error: bool,
     err_msg: str,
     task_id: str,
-    temp_folder: PosixPath = TEMP_FOLDER,
+    task_folder: PosixPath = TASK_FOLDER,
 ):
     """Functionality to update the task report.
 
@@ -70,12 +74,13 @@ async def update_tasks_report(
         error (bool): Boolean flag to indicate if Hunting process
             on a was successful or not
         task_id (str): Unique task id
-        temp_folder (PosixPath, optional): "temp" folder location ,
-            where all task reports are saved. Defaults to TEMP_FOLDER.
+        task_folder (PosixPath, optional): "task" folder location ,
+            where all task reports are saved. Defaults to TASK_FOLDER.
     """
     # load the json file
     try:
-        task_details = json.load(open(temp_folder / f"{task_id}.json"))
+        task_file_path = task_folder / f"{task_id}.json"
+        task_details = json.load(open(task_file_path))
     except FileNotFoundError as e:
         print(f"{e}")
         raise
@@ -98,5 +103,54 @@ async def update_tasks_report(
                 ).dict()
             )
         # write the task details to the json file
-        with open(temp_folder / f"{task_id}.json", "w") as task_report:
+        with open(task_file_path, "w") as task_report:
+            # write the updated time for task details
+            # new process time is difference between \
+            # current access time and start time
+            task_details["process_time"] = (
+                task_file_path.stat().st_atime - task_details["start_time"]
+            )
+
             json.dump(task_details, task_report)
+
+
+async def get_all_tasks(
+    skip: int,
+    limit: int,
+):
+    """Functionality to get all tasks."""
+    # consider all files present inside the Task Folder
+    # using Pathlib stat function to get metadata of each file
+    # the apply appropriate sorting on the basis of the recent \
+    # modification time of the file
+    task_id_files = sorted(
+        TASK_FOLDER.iterdir(),
+        key=lambda file: file.stat().st_mtime,
+        reverse=True,
+    )
+    total_tasks = len(task_id_files)
+    # Rounds a number up to the nearest integer
+    maximum_page_size = math.ceil(total_tasks / limit)
+    # read all tasks and then return
+    tasks = [
+        json.load(each_file.open()) for each_file in task_id_files[skip:limit]
+    ]
+    return {
+        "total_tasks": total_tasks,
+        "maximum_page_size": maximum_page_size,
+        "tasks": tasks,
+    }
+
+
+async def get_task_by_id(
+    task_id: str,
+):
+    """Functionality to get a task by its id."""
+    # consider all files present inside the Task Folder
+    task_id_files = [
+        each_file for each_file in TASK_FOLDER.glob(f"*{task_id}.json")
+    ]
+
+    # read the task and then return
+    task = json.load(task_id_files[0].open())
+    return task

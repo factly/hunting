@@ -17,7 +17,8 @@ services:
       uvicorn app.main:app --reload --host 0.0.0.0;
       "      
     volumes:
-      - .:/app   
+      - .:/app  
+      - ./volumes/hunting/task:/task
     # environment:
 
       # # CORE PARAMS

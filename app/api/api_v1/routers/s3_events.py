@@ -5,7 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, status
 from app.core.config import Settings
 from app.models.enums import ProfileActions
 from app.models.task import Task
-from app.models.tasks import Tasks
+from app.models.task_list import TaskList
 from app.utils.tasks_functions import (
     create_task_id,
     get_all_tasks,
@@ -103,7 +103,7 @@ async def to_s3_bulk_upload_folder(
 @router.get(
     "/bulk/tasks",
     summary="Get all Tasks Ids",
-    response_model=Tasks,
+    response_model=TaskList,
     response_model_exclude_none=True,
 )
 async def get_bg_tasks(skip: int = 0, limit: int = 10):

@@ -19,7 +19,7 @@ settings = Settings()
 
 class RequestSaveToS3(BaseModel):
     hunting_operation_api: str = (
-        "http://0.0.0.0:8000/api/v1/profile/description/"
+        "http://0.0.0.0:8005/api/v1/profile/description/"
     )
     target_bucket_name: str = settings.S3_BUCKET
     target_access_key: str = settings.S3_KEY

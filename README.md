@@ -21,7 +21,7 @@ Once the application is up and running you should be able to access it using the
 
 | Service | URL |
 |--|--|
-| Server | API Root: http://0.0.0.0:8000/api/v1 <br> Swagger: http://0.0.0.0:8000/api/docs <br> Redoc: http://0.0.0.0:8000/redoc|
+| Server | API Root: http://0.0.0.0:8005/api/v1 <br> Swagger: http://0.0.0.0:8005/api/docs <br> Redoc: http://0.0.0.0:8005/redoc|
 | Minio | API: http://localhost:9000 <br> Console: http://localhost:9001 <br> Username: minio <br> Password: password|
 
 

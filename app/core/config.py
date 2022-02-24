@@ -25,9 +25,9 @@ class Settings(BaseSettings):
 
     # CORS PARAMS
     CORS_ORIGINS: list = [
-        "http://127.0.0.1:8000",
+        "http://127.0.0.1:8005",
         "http://localhost",
-        "http://localhost:8000",
+        "http://localhost:8005",
     ]
     CORS_METHODS: list = ["GET"]
 

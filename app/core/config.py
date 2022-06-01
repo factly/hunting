@@ -24,12 +24,8 @@ class Settings(BaseSettings):
     S3_SECURE_TARGET: bool = False
 
     # CORS PARAMS
-    CORS_ORIGINS: list = [
-        "http://127.0.0.1:8000",
-        "http://localhost",
-        "http://localhost:8000",
-    ]
-    CORS_METHODS: list = ["GET"]
+    CORS_ORIGINS: list = ["*"]
+    CORS_METHODS: list = ["*"]
 
     class Config:
         env_file = ".env"

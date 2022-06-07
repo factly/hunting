@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # CORS PARAMS
     CORS_ORIGINS: list = ["*"]
     CORS_METHODS: list = ["*"]
+    CORS_HEADERS: list = ["*"]
 
     class Config:
         env_file = ".env"

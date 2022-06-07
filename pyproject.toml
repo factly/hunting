@@ -19,7 +19,7 @@ fsspec = "^2021.10.1"
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
-black = "^21.9b0"
+black = "^22.3.0"
 
 [tool.black]
 line-length = 79

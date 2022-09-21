@@ -88,7 +88,7 @@ async def profile_samples(
     )
 
     # use `ProfileSegments` to get table part of pandas profiling
-    profile_segment = ProfileSegments(profile)
+    profile_segment = ProfileSegments(profile, columns=list(dataframe.columns))
     samples = profile_segment.samples()
 
     return samples
@@ -351,7 +351,9 @@ async def profile_description(
     )
 
     # use `ProfileSegments` to get duplicates part of pandas profiling
-    profile_segment = ProfileSegments(profile)
+    profile_segment = ProfileSegments(
+        profile, columns_order=list(dataframe.columns)
+    )
     description = profile_segment.description()
 
     return description

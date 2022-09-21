@@ -88,7 +88,7 @@ async def profile_samples(
     )
 
     # use `ProfileSegments` to get table part of pandas profiling
-    profile_segment = ProfileSegments(profile, columns=list(dataframe.columns))
+    profile_segment = ProfileSegments(profile)
     samples = profile_segment.samples()
 
     return samples

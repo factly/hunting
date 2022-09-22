@@ -14,6 +14,8 @@ task
 __pycache__/
 *.py[cod]
 *$py.class
+*.DS_Store
+.DS_Store
 
 # C extensions
 *.so

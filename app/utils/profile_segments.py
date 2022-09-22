@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import List
+from typing import List, Union
 
 import numpy as np
 from numpy import bool_
@@ -40,12 +40,13 @@ def json_conversion_objects(obj):
 
 
 class ProfileSegments:
-    def __init__(self, pandas_profile):
+    def __init__(self, pandas_profile, columns_order=None):
         """
         Pass pandas profile of a dataset as argument
         """
         self.pandas_profile = pandas_profile
         self.profile_description = pandas_profile.get_description()
+        self.col_order = columns_order
 
     def analysis(self) -> Analysis:
         return parse_obj_as(
@@ -110,6 +111,9 @@ class ProfileSegments:
             mod_duplicates = "None"
         return mod_duplicates
 
+    def columns_order(self) -> Union[List[str], None]:
+        return self.col_order
+
     def description(self) -> Description:
         return {
             "analysis": self.analysis(),
@@ -122,4 +126,5 @@ class ProfileSegments:
             "package": self.package(),
             "samples": self.samples(),
             "duplicates": self.duplicates(),
+            "columns_order": self.columns_order(),
         }

@@ -25,3 +25,4 @@ class Description(BaseModel):
     package: Package
     samples: List[Sample]
     duplicates: Duplicates
+    columns_order: List[str]

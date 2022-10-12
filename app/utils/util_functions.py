@@ -14,8 +14,16 @@ from pandas_profiling import ProfileReport
 from app.core.config import Settings
 from app.utils.profile_segments import ProfileSegments
 from app.utils.tasks_functions import create_new_task, update_tasks_report
+from charset_normalizer import from_bytes
+from requests import get
 
 setting = Settings()
+
+def get_encoding(obj = None, url = None):
+    if url:
+        obj = get(url).content
+    encoding = from_bytes(obj).best().encoding
+    return encoding
 
 
 def json_conversion_objects(obj):
@@ -53,16 +61,25 @@ def provide_dataframe(
     """
     # read any thing and provide proper dataframe instance
     # link : str, validate as proper url
-
+    
     if source == "s3":
         obj = s3_client.get_object(bucket, file_url)
-        df = read_csv(obj)
+        try: 
+            df = read_csv(obj)
+        except UnicodeDecodeError:
+            encoding = get_encoding(obj = obj)
+            df = read_csv(obj, encoding = encoding)
 
     # use link from file present in mande Studio
     # dataframe : dataframe
     # csv file path : str
     if source == "url":
-        df = read_csv(file_url, na_values="NA")
+        try: 
+            df = read_csv(file_url, na_values="NA")
+        except UnicodeDecodeError:
+            encoding = get_encoding(url = file_url)
+            print(encoding)
+            df = read_csv(file_url, na_values="NA", encoding = encoding)
     return df
 
 

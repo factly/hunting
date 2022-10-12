@@ -4,22 +4,23 @@ from io import BytesIO
 from pathlib import Path
 
 import numpy as np
+from charset_normalizer import from_bytes
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from minio import Minio
 from numpy import bool_
 from pandas import read_csv
 from pandas_profiling import ProfileReport
+from requests import get
 
 from app.core.config import Settings
 from app.utils.profile_segments import ProfileSegments
 from app.utils.tasks_functions import create_new_task, update_tasks_report
-from charset_normalizer import from_bytes
-from requests import get
 
 setting = Settings()
 
-def get_encoding(obj = None, url = None):
+
+def get_encoding(obj=None, url=None):
     if url:
         obj = get(url).content
     encoding = from_bytes(obj).best().encoding
@@ -61,24 +62,24 @@ def provide_dataframe(
     """
     # read any thing and provide proper dataframe instance
     # link : str, validate as proper url
-    
+
     if source == "s3":
         obj = s3_client.get_object(bucket, file_url)
-        try: 
+        try:
             df = read_csv(obj)
         except UnicodeDecodeError:
-            encoding = get_encoding(obj = obj)
-            df = read_csv(obj, encoding = encoding)
+            encoding = get_encoding(obj=obj)
+            df = read_csv(obj, encoding=encoding)
 
     # use link from file present in mande Studio
     # dataframe : dataframe
     # csv file path : str
     if source == "url":
-        try: 
+        try:
             df = read_csv(file_url, na_values="NA")
         except UnicodeDecodeError:
-            encoding = get_encoding(url = file_url)
-            df = read_csv(file_url, na_values="NA", encoding = encoding)
+            encoding = get_encoding(url=file_url)
+            df = read_csv(file_url, na_values="NA", encoding=encoding)
     return df
 
 

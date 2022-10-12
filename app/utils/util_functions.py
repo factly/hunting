@@ -78,7 +78,6 @@ def provide_dataframe(
             df = read_csv(file_url, na_values="NA")
         except UnicodeDecodeError:
             encoding = get_encoding(url = file_url)
-            print(encoding)
             df = read_csv(file_url, na_values="NA", encoding = encoding)
     return df
 

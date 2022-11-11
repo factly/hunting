@@ -9,6 +9,13 @@ from app.core.config import Settings
 setting = Settings()
 
 
+def get_encoding(obj=None, url=None):
+    if url:
+        obj = get(url).content
+    encoding = from_bytes(obj).best().encoding
+    return encoding
+
+
 def json_conversion_objects(obj):
     """Fix improper objects while creating json
     Function use to convert non-JSON serializable objects to proper format
@@ -42,5 +49,9 @@ def provide_dataframe(file_url: str, source="url"):
     # dataframe : dataframe
     # csv file path : str
     if source == "url":
-        df = read_csv(file_url, na_values="NA")
+        try:
+            df = read_csv(file_url, na_values="NA")
+        except UnicodeDecodeError:
+            encoding = get_encoding(url=file_url)
+            df = read_csv(file_url, na_values="NA", encoding=encoding)
     return df

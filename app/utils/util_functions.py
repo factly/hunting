@@ -1,8 +1,10 @@
 import datetime
 
 import numpy as np
+from charset_normalizer import from_bytes
 from numpy import bool_
 from pandas import read_csv
+from requests import get
 
 from app.core.config import Settings
 

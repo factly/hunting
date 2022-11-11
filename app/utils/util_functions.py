@@ -46,12 +46,9 @@ def provide_dataframe(file_url: str, source="url"):
     # read any thing and provide proper dataframe instance
     # link : str, validate as proper url
     # use link from file present in mande Studio
-    # dataframe : dataframe
-    # csv file path : str
-    if source == "url":
-        try:
-            df = read_csv(file_url, na_values="NA")
-        except UnicodeDecodeError:
-            encoding = get_encoding(url=file_url)
-            df = read_csv(file_url, na_values="NA", encoding=encoding)
+    try:
+        df = read_csv(file_url, na_values="NA")
+    except UnicodeDecodeError:
+        encoding = get_encoding(url=file_url)
+        df = read_csv(file_url, na_values="NA", encoding=encoding)
     return df

@@ -48,7 +48,7 @@ async def provide_raw_profiling(
         samples_to_show = 5
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
@@ -80,7 +80,7 @@ async def profile_samples(
         samples_to_show = 5
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=True,
         samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
@@ -112,7 +112,7 @@ async def profile_table(source: str = setting.EXAMPLE_URL):
     #     samples_to_show = 5
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=True,
         # samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,
@@ -139,7 +139,7 @@ async def profile_analysis(source: str = setting.EXAMPLE_URL):
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=True,
         show_variable_description=False,
         progress_bar=False,
@@ -162,7 +162,7 @@ async def profile_alerts(source: str = setting.EXAMPLE_URL):
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=True,
         show_variable_description=False,
         progress_bar=False,
@@ -187,7 +187,7 @@ async def profile_scatter(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -212,7 +212,7 @@ async def profile_correlations(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -237,7 +237,7 @@ async def profile_missing(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -262,7 +262,7 @@ async def profile_package(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -287,7 +287,7 @@ async def profile_variables(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -312,7 +312,7 @@ async def profile_duplicates(
     dataframe = provide_dataframe(source)
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         show_variable_description=False,
         progress_bar=False,
@@ -343,7 +343,7 @@ async def profile_description(
         samples_to_show = 5
 
     profile = ProfileReport(
-        dataframe,
+        dataframe.to_pandas(),
         minimal=minimal,
         samples={"head": samples_to_show, "tail": samples_to_show},
         show_variable_description=False,

@@ -151,6 +151,37 @@ unicode = ["unicodedata2 (>=14.0.0)"]
 woff = ["zopfli (>=0.1.4)", "brotlicffi (>=0.8.0)", "brotli (>=1.0.1)"]
 
 [[package]]
+name = "fsspec"
+version = "2022.11.0"
+description = "File-system specification"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+abfs = ["adlfs"]
+adl = ["adlfs"]
+arrow = ["pyarrow (>=1)"]
+dask = ["dask", "distributed"]
+dropbox = ["dropboxdrivefs", "requests", "dropbox"]
+entrypoints = ["importlib-metadata"]
+fuse = ["fusepy"]
+gcs = ["gcsfs"]
+git = ["pygit2"]
+github = ["requests"]
+gs = ["gcsfs"]
+gui = ["panel"]
+hdfs = ["pyarrow (>=1)"]
+http = ["requests", "aiohttp (!=4.0.0a0,!=4.0.0a1)"]
+libarchive = ["libarchive-c"]
+oci = ["ocifs"]
+s3 = ["s3fs"]
+sftp = ["paramiko"]
+smb = ["smbprotocol"]
+ssh = ["paramiko"]
+tqdm = ["tqdm"]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -385,7 +416,7 @@ unicode = ["tangled-up-in-unicode (==0.2.0)"]
 
 [[package]]
 name = "pathspec"
-version = "0.10.1"
+version = "0.10.2"
 description = "Utility library for gitignore style pattern matching of file paths."
 category = "dev"
 optional = false
@@ -438,7 +469,7 @@ tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "pa
 
 [[package]]
 name = "platformdirs"
-version = "2.5.3"
+version = "2.5.4"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "dev"
 optional = false
@@ -447,6 +478,43 @@ python-versions = ">=3.7"
 [package.extras]
 docs = ["furo (>=2022.9.29)", "proselint (>=0.13)", "sphinx-autodoc-typehints (>=1.19.4)", "sphinx (>=5.3)"]
 test = ["appdirs (==1.4.4)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest (>=7.2)"]
+
+[[package]]
+name = "polars"
+version = "0.14.28"
+description = "Blazingly fast DataFrame library"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+fsspec = {version = "*", optional = true, markers = "extra == \"fsspec\""}
+numpy = {version = ">=1.16.0", optional = true, markers = "extra == \"numpy\""}
+pandas = {version = "*", optional = true, markers = "extra == \"pandas\""}
+pyarrow = {version = ">=4.0.0", optional = true, markers = "extra == \"pyarrow\""}
+typing_extensions = {version = ">=4.0.0", markers = "python_version < \"3.10\""}
+
+[package.extras]
+xlsx2csv = ["xlsx2csv (>=0.8.0)"]
+numpy = ["numpy (>=1.16.0)"]
+fsspec = ["fsspec"]
+connectorx = ["connectorx"]
+pyarrow = ["pyarrow (>=4.0.0)"]
+timezone = ["backports.zoneinfo", "tzdata"]
+all = ["polars"]
+pandas = ["pyarrow (>=4.0.0)", "pandas"]
+matplotlib = ["matplotlib"]
+
+[[package]]
+name = "pyarrow"
+version = "10.0.0"
+description = "Python library for Apache Arrow"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.16.6"
 
 [[package]]
 name = "pycodestyle"
@@ -773,7 +841,7 @@ type_image_path = ["imagehash", "pillow"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "bb366ec22806113b883c67f777c19ff8c92ffdd0bc2bc08a6e4a4dd893d8c680"
+content-hash = "a179d46e1cc8a14a57d13bb2a584ba19d81b595e82cf0824ddfc93e087d40ee4"
 
 [metadata.files]
 anyio = []
@@ -793,6 +861,7 @@ cycler = [
 fastapi = []
 flake8 = []
 fonttools = []
+fsspec = []
 h11 = []
 htmlmin = []
 idna = []
@@ -873,6 +942,8 @@ patsy = []
 phik = []
 pillow = []
 platformdirs = []
+polars = []
+pyarrow = []
 pycodestyle = []
 pydantic = []
 pyflakes = []

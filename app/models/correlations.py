@@ -11,3 +11,6 @@ class Correlations(BaseModel):
     kendall: Optional[Union[Json, Dict]]
     cramers: Optional[Union[Json, Dict]]
     phi_k: Optional[Union[Json, Dict]]
+
+    class Config:
+        underscore_attrs_are_private = True

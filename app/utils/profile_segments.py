@@ -7,6 +7,7 @@ from numpy import bool_
 from pandas import DataFrame
 from pydantic import parse_obj_as
 
+from app.core.config import Settings
 from app.models.alerts import Alerts
 from app.models.analysis import Analysis
 from app.models.correlations import Correlations
@@ -18,6 +19,8 @@ from app.models.sample import Sample
 from app.models.scatter import Scatter
 from app.models.table import Table
 from app.models.variables import Variables
+
+settings = Settings()
 
 
 def json_conversion_objects(obj):
@@ -100,7 +103,14 @@ class ProfileSegments:
         samples = self.pandas_profile.get_sample()
         for sample in samples:
             sample.data = sample.data.to_json()
-        return samples
+        print(type(samples))
+        # * 'head' and 'tail' are returned as dataset sample
+        # * use env variable to select `hear` or `tail` or `both`
+        return [
+            sample
+            for sample in samples
+            if sample.id in settings.SAMPLE_DATA_RENDERER
+        ]
 
     def duplicates(self) -> Duplicates:
         # get duplicates

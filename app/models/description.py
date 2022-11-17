@@ -15,14 +15,17 @@ from app.models.variables import Variables
 
 
 class Description(BaseModel):
-    analysis: Analysis
+    _analysis: Analysis
     table: Table
     variables: Variables
-    scatter: Scatter
-    correlations: Correlations
-    missing: Missing
-    alerts: Alerts
-    package: Package
+    _scatter: Scatter
+    _correlations: Correlations
+    _missing: Missing
+    _alerts: Alerts
+    _package: Package
     samples: List[Sample]
-    duplicates: Duplicates
+    _duplicates: Duplicates
     columns_order: List[str]
+
+    class Config:
+        underscore_attrs_are_private = True

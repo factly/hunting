@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseSettings
 
 
@@ -11,9 +13,16 @@ class Settings(BaseSettings):
     EXAMPLE_URL: str = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"  # noqa: E501
 
     # CORS PARAMS
-    CORS_ORIGINS: list = ["*"]
-    CORS_METHODS: list = ["*"]
-    CORS_HEADERS: list = ["*"]
+    CORS_ORIGINS: List[str] = ["*"]
+    CORS_METHODS: List[str] = ["*"]
+    CORS_HEADERS: List[str] = ["*"]
+
+    # MODEL PARAMS
+    # Constraint for Column names
+    COLUMN_NAME_REGEX_PATTERN = r"[\w\s]*"
+
+    # PROFILE SEGMENTS
+    SAMPLE_DATA_RENDERER: List[str] = ["head"]
 
     class Config:
         env_file = ".env"

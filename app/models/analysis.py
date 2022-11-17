@@ -8,3 +8,6 @@ class Analysis(BaseModel):
     date_start: datetime
     date_end: datetime
     duration: timedelta
+
+    class Config:
+        underscore_attrs_are_private = True

@@ -9,3 +9,6 @@ class Sample(BaseModel):
     data: Json
     name: str
     caption: Optional[str] = None
+
+    class Config:
+        underscore_attrs_are_private = True

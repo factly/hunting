@@ -9,7 +9,7 @@ services:
       - 8000:8000
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     command: >
       /bin/sh -c "
       poetry run uvicorn app.main:app --reload --host 0.0.0.0;

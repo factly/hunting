@@ -1,8 +1,11 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM python:3.10.8-slim-buster
+
+RUN apt-get update
+RUN apt-get install curl -y
 
 WORKDIR /app
 
-ENV POETRY_VERSION=1.1.7
+ENV POETRY_VERSION=1.2.0
 
 # Install Poetry
 RUN curl -sSL  https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \

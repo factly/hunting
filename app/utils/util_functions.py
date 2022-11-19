@@ -1,9 +1,9 @@
 import datetime
 
 import numpy as np
+import polars as pl
 from charset_normalizer import from_bytes
 from numpy import bool_
-from pandas import read_csv
 from requests import get
 
 from app.core.config import Settings
@@ -49,8 +49,8 @@ def provide_dataframe(file_url: str, source="url"):
     # link : str, validate as proper url
     # use link from file present in mande Studio
     try:
-        df = read_csv(file_url, na_values="NA")
+        df = pl.read_csv(file_url, null_values="NA")
     except UnicodeDecodeError:
         encoding = get_encoding(url=file_url)
-        df = read_csv(file_url, na_values="NA", encoding=encoding)
+        df = pl.read_csv(file_url, null_values="NA", encoding=encoding)
     return df

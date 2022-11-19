@@ -13,6 +13,7 @@ python-dotenv = "^0.21.0"
 pandas-profiling = "^3.3.0"
 aioredis = "^2.0.1"
 polars = {extras = ["numpy", "pandas", "pyarrow", "fsspec"], version = "^0.14.28"}
+aioredis = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

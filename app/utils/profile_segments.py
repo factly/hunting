@@ -43,13 +43,13 @@ def json_conversion_objects(obj):
 
 
 class ProfileSegments:
-    def __init__(self, pandas_profile, columns_order=None):
+    def __init__(self, pandas_profile, columns=None):
         """
         Pass pandas profile of a dataset as argument
         """
         self.pandas_profile = pandas_profile
         self.profile_description = pandas_profile.get_description()
-        self.col_order = columns_order
+        self.col_order = columns
 
     def analysis(self) -> Analysis:
         return parse_obj_as(
@@ -121,7 +121,7 @@ class ProfileSegments:
             mod_duplicates = "None"
         return mod_duplicates
 
-    def columns_order(self) -> Union[List[str], None]:
+    def columns(self) -> Union[List[str], None]:
         return self.col_order
 
     def description(self) -> Description:
@@ -136,5 +136,5 @@ class ProfileSegments:
             "package": self.package(),
             "samples": self.samples(),
             "duplicates": self.duplicates(),
-            "columns_order": self.columns_order(),
+            "columns": self.columns(),
         }

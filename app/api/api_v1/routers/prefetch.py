@@ -1,7 +1,9 @@
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 from pandas_profiling import ProfileReport
 
 from app.core.config import Settings
+from app.db.mongo import profiles_collection
 from app.models.prefetch import Prefetch
 from app.utils.profile_segments import ProfileSegments
 from app.utils.util_functions import provide_dataframe
@@ -30,10 +32,6 @@ async def prefetch_profiles(prefetch: Prefetch):
     minimal = prefetch.minimal
     samples_to_fetch = prefetch.samples_to_fetch
 
-    if urls.__len__() == 0:
-        # TODO: Raise Exception
-        return {"message": "No URLs provided"}
-
     for url in urls:
 
         # Fetch Profile for each URL
@@ -44,7 +42,7 @@ async def prefetch_profiles(prefetch: Prefetch):
             samples_to_fetch = 5
 
         profile = ProfileReport(
-            dataframe,
+            dataframe.to_pandas(),
             minimal=minimal,
             samples={"head": samples_to_fetch, "tail": samples_to_fetch},
             show_variable_description=False,
@@ -53,13 +51,17 @@ async def prefetch_profiles(prefetch: Prefetch):
 
         # use `ProfileSegments` to get duplicates part of pandas profiling
         profile_segment = ProfileSegments(
-            profile, columns_order=list(dataframe.columns)
+            profile, columns=list(dataframe.columns)
         )
         description = profile_segment.description()
 
-        # Save Profile to MongoDB
+        # Save Profiles to `profiles` collection in MongoDB
+        # profile = await profiles_collection.insert_one(description)
+        profiles_collection.insert_one(jsonable_encoder(description))
 
+    # Step 1.1: Upsert the document based on the URL
+    # Step 1.x: Move the prefetching code to a separate function
     # Step 2: Implement prefetching as a background task
-
     # Step 3: Create a TaskID and return it to the user
+    # Step 4: Implement MongoDB insert as async
     return description

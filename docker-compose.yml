@@ -11,8 +11,24 @@ services:
     ports:
       - 6379:6379    
     volumes:
-      - ./redis:/data
+      - ./volumes/redis:/data
     command: redis-server --appendonly yes --requirepass redispass
+    networks:
+      - hunting
+
+  ##########################################################################
+  ######                           DATABASES                         #######
+  ##########################################################################
+  mongodb:
+    image: mongo:6.0.3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: hunting
+    ports: 
+      - 27017:27017
+    volumes:
+      - ./volumes/mongodb/:/data/db/
     networks:
       - hunting
 

@@ -12,6 +12,13 @@ class Settings(BaseSettings):
     # EXAMPLE PARAMS
     EXAMPLE_URL: str = "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"  # noqa: E501
 
+    # MONGODB PARAMS
+    MONGODB_HOST: str = "mongodb"
+    MONGODB_PORT: int = 27017
+    MONGODB_DATABASE: str = "hunting"
+    MONGODB_USER: str = "root"
+    MONGODB_PASSWORD: str = "example"
+
     # CORS PARAMS
     CORS_ORIGINS: List[str] = ["*"]
     CORS_METHODS: List[str] = ["*"]

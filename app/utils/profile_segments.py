@@ -103,7 +103,6 @@ class ProfileSegments:
         samples = self.pandas_profile.get_sample()
         for sample in samples:
             sample.data = sample.data.to_json()
-        print(type(samples))
         # * 'head' and 'tail' are returned as dataset sample
         # * use env variable to select `hear` or `tail` or `both`
         return [

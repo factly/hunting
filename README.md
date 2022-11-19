@@ -45,3 +45,8 @@ Or use the following command to stop the application, and remove all the contain
     - The values in `.env.example` are pre-configured to running the application using the default `docker-compose.yml`
 - If no `.env` file is found in the root directory, the default values provided in `/app/core/config.py` will be considered for the environment variables.
     - The values in `/app/core/config.py` are pre-configured to running the application using the default `docker-compose.yml`
+
+### Prefetch
+
+- Prefetch group of routes will only be enabled if `ENABLE_PREFETCH` is `true`
+- 

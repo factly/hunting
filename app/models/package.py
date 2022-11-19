@@ -6,6 +6,3 @@ from pydantic import BaseModel
 class Package(BaseModel):
     pandas_profiling_version: str
     pandas_profiling_config: str
-
-    class Config:
-        underscore_attrs_are_private = True

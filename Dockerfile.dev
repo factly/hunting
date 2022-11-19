@@ -1,7 +1,4 @@
-FROM python:3.10.8-slim-buster
-
-RUN apt-get update
-RUN apt-get install curl -y
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
 
 WORKDIR /app
 

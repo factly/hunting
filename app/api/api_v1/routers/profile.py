@@ -17,7 +17,7 @@ from app.models.scatter import Scatter
 from app.models.table import Table
 from app.models.variables import Variables
 from app.utils.profile_segments import ProfileSegments
-from app.utils.util_functions import provide_dataframe
+from app.utils.util_functions import get_dataframe
 
 profile_router = router = APIRouter()
 setting = Settings()
@@ -40,7 +40,7 @@ async def provide_raw_profiling(
         response (json): Pandas-Profile in json
     """
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to
@@ -72,7 +72,7 @@ async def profile_samples(
     Get samples for data
     """
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to
@@ -104,7 +104,7 @@ async def profile_table(source: str = setting.EXAMPLE_URL):
     Get table part of pandas profiling for data
     """
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to
@@ -136,7 +136,7 @@ async def profile_analysis(source: str = setting.EXAMPLE_URL):
     Get Analysis part of pandas profiling for data
     """
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -159,7 +159,7 @@ async def profile_analysis(source: str = setting.EXAMPLE_URL):
 )
 async def profile_alerts(source: str = setting.EXAMPLE_URL):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -184,7 +184,7 @@ async def profile_scatter(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -209,7 +209,7 @@ async def profile_correlations(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -234,7 +234,7 @@ async def profile_missing(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -259,7 +259,7 @@ async def profile_package(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -284,7 +284,7 @@ async def profile_variables(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -309,7 +309,7 @@ async def profile_duplicates(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     profile = ProfileReport(
         dataframe.to_pandas(),
@@ -335,7 +335,7 @@ async def profile_description(
     minimal: bool = True,
     samples_to_show: int = 10,
 ):
-    dataframe = provide_dataframe(source)
+    dataframe = get_dataframe(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to

@@ -34,7 +34,7 @@ def json_conversion_objects(obj):
         return obj.item()
 
 
-def provide_dataframe(file_url: str, source="url"):
+def get_dataframe(file_url: str, source="url"):
     """Functionality to provide dataframe from various sources
 
     Args:

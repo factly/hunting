@@ -6,7 +6,7 @@ from app.core.config import Settings
 from app.db.mongo import profiles_collection
 from app.models.prefetch import Prefetch
 from app.utils.profile_segments import ProfileSegments
-from app.utils.util_functions import provide_dataframe
+from app.utils.util_functions import get_dataframe
 
 prefetch_router = router = APIRouter()
 setting = Settings()
@@ -36,7 +36,7 @@ async def prefetch_profiles(prefetch: Prefetch):
 
         # Fetch Profile for each URL
         # TODO: Move the following code to a separate function
-        dataframe = provide_dataframe(url)
+        dataframe = get_dataframe(url)
 
         if dataframe.shape[0] < 100:
             samples_to_fetch = 5
@@ -57,6 +57,10 @@ async def prefetch_profiles(prefetch: Prefetch):
 
         # Save Profiles to `profiles` collection in MongoDB
         # profile = await profiles_collection.insert_one(description)
+        # Add `url` to the description before saving to MongoDB
+        description["url"] = url
+
+        # Insert a json-encoded description into MongoDB
         profiles_collection.insert_one(jsonable_encoder(description))
 
     # Step 1.1: Upsert the document based on the URL

@@ -16,7 +16,7 @@ from app.models.sample import Sample
 from app.models.scatter import Scatter
 from app.models.table import Table
 from app.models.variables import Variables
-from app.utils.profile_segments import ProfileSegments
+from app.utils.profile_db import get_profile
 from app.utils.util_functions import get_dataframe
 
 profile_router = router = APIRouter()
@@ -72,26 +72,12 @@ async def profile_samples(
     Get samples for data
     """
 
-    dataframe = get_dataframe(source)
-
-    # WHAT?: Change sample sizes based on number of rows
-    # WHY?: Fow smaller dataset number of samples to
-    if dataframe.shape[0] < 100:
-        samples_to_show = 5
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
+    return await get_profile(
+        source,
         minimal=True,
-        samples={"head": samples_to_show, "tail": samples_to_show},
-        show_variable_description=False,
-        progress_bar=False,
+        samples_to_show=samples_to_show,
+        segment="samples",
     )
-
-    # use `ProfileSegments` to get table part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    samples = profile_segment.samples()
-
-    return samples
 
 
 @router.get(
@@ -104,26 +90,7 @@ async def profile_table(source: str = setting.EXAMPLE_URL):
     Get table part of pandas profiling for data
     """
 
-    dataframe = get_dataframe(source)
-
-    # WHAT?: Change sample sizes based on number of rows
-    # WHY?: Fow smaller dataset number of samples to
-    # if dataframe.shape[0] < 100:
-    #     samples_to_show = 5
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=True,
-        # samples={"head": samples_to_show, "tail": samples_to_show},
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get table part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    table = profile_segment.table()
-
-    return table
+    return await get_profile(source, minimal=True, segment="table")
 
 
 @router.get(
@@ -136,20 +103,7 @@ async def profile_analysis(source: str = setting.EXAMPLE_URL):
     Get Analysis part of pandas profiling for data
     """
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=True,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    analysis = profile_segment.analysis()
-
-    return analysis
+    return await get_profile(source, minimal=True, segment="analysis")
 
 
 @router.get(
@@ -159,20 +113,7 @@ async def profile_analysis(source: str = setting.EXAMPLE_URL):
 )
 async def profile_alerts(source: str = setting.EXAMPLE_URL):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=True,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    alerts = profile_segment.alerts()
-
-    return alerts
+    return await get_profile(source, minimal=True, segment="alerts")
 
 
 @router.get(
@@ -184,20 +125,7 @@ async def profile_scatter(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    scatter = profile_segment.scatter()
-
-    return scatter
+    return await get_profile(source, minimal=minimal, segment="scatter")
 
 
 @router.get(
@@ -209,20 +137,7 @@ async def profile_correlations(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    correlations = profile_segment.correlations()
-
-    return correlations
+    return await get_profile(source, minimal=minimal, segment="correlations")
 
 
 @router.get(
@@ -234,20 +149,7 @@ async def profile_missing(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    missing = profile_segment.missing()
-
-    return missing
+    return await get_profile(source, minimal=minimal, segment="missing")
 
 
 @router.get(
@@ -259,20 +161,7 @@ async def profile_package(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    package = profile_segment.package()
-
-    return package
+    return await get_profile(source, minimal=minimal, segment="package")
 
 
 @router.get(
@@ -284,20 +173,7 @@ async def profile_variables(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get analysis part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    variables = profile_segment.variables()
-
-    return variables
+    return await get_profile(source, minimal=minimal, segment="variables")
 
 
 @router.get(
@@ -309,20 +185,7 @@ async def profile_duplicates(
     source: str = setting.EXAMPLE_URL, minimal: bool = True
 ):
 
-    dataframe = get_dataframe(source)
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
-        minimal=minimal,
-        show_variable_description=False,
-        progress_bar=False,
-    )
-
-    # use `ProfileSegments` to get duplicates part of pandas profiling
-    profile_segment = ProfileSegments(profile)
-    duplicates = profile_segment.duplicates()
-
-    return duplicates
+    return await get_profile(source, minimal=minimal, segment="duplicates")
 
 
 @router.get(
@@ -335,23 +198,10 @@ async def profile_description(
     minimal: bool = True,
     samples_to_show: int = 10,
 ):
-    dataframe = get_dataframe(source)
 
-    # WHAT?: Change sample sizes based on number of rows
-    # WHY?: Fow smaller dataset number of samples to
-    if dataframe.shape[0] < 100:
-        samples_to_show = 5
-
-    profile = ProfileReport(
-        dataframe.to_pandas(),
+    return await get_profile(
+        url=source,
         minimal=minimal,
-        samples={"head": samples_to_show, "tail": samples_to_show},
-        show_variable_description=False,
-        progress_bar=False,
+        samples_to_show=samples_to_show,
+        segment="description",
     )
-
-    # use `ProfileSegments` to get duplicates part of pandas profiling
-    profile_segment = ProfileSegments(profile, columns=list(dataframe.columns))
-    description = profile_segment.description()
-
-    return description

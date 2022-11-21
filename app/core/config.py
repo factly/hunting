@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     MONGODB_USER: str = "root"
     MONGODB_PASSWORD: str = "example"
 
+    # S3 CONFIGURATION
+    S3_ENDPOINT_URL: str = "CHANGE_ME"
+    S3_ACCESS_KEY_ID: str = "CHANGE_ME"
+    S3_SECRET_ACCESS_KEY: str = "CHANGE_ME"
+
     # CORS PARAMS
     CORS_ORIGINS: List[str] = ["*"]
     CORS_METHODS: List[str] = ["*"]

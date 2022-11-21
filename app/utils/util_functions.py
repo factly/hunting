@@ -1,7 +1,9 @@
 import datetime
+from urllib.parse import urlparse
 
 import numpy as np
 import polars as pl
+import s3fs
 from charset_normalizer import from_bytes
 from numpy import bool_
 from requests import get
@@ -48,9 +50,27 @@ def get_dataframe(file_url: str, source="url"):
     # read any thing and provide proper dataframe instance
     # link : str, validate as proper url
     # use link from file present in mande Studio
-    try:
-        df = pl.read_csv(file_url, null_values="NA")
-    except UnicodeDecodeError:
-        encoding = get_encoding(url=file_url)
-        df = pl.read_csv(file_url, null_values="NA", encoding=encoding)
-    return df
+
+    url = urlparse(file_url)
+
+    if url.scheme == "http" or url.scheme == "https":
+
+        try:
+            df = pl.read_csv(file_url, null_values="NA", infer_schema_length=0)
+        except UnicodeDecodeError:
+            encoding = get_encoding(url=file_url)
+            df = pl.read_csv(file_url, null_values="NA", encoding=encoding)
+        return df
+
+    elif url.scheme == "s3":
+
+        fs = s3fs.S3FileSystem(
+            key=setting.S3_ACCESS_KEY_ID,
+            secret=setting.S3_SECRET_ACCESS_KEY,
+            client_kwargs={"endpoint_url": setting.S3_ENDPOINT_URL},
+        )
+
+        with fs.open(f"{url.netloc}{url.path}") as f:
+            df = pl.read_csv(f, null_values="NA", infer_schema_length=0)
+
+        return df

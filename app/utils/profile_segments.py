@@ -123,17 +123,22 @@ class ProfileSegments:
     def columns(self) -> Union[List[str], None]:
         return self.col_order
 
-    def description(self) -> Description:
-        return {
-            "analysis": self.analysis(),
-            "table": self.table(),
-            "variables": self.variables(),
-            "scatter": self.scatter(),
-            "correlations": self.correlations(),
-            "missing": self.missing(),
-            "alerts": self.alerts(),
-            "package": self.package(),
-            "samples": self.samples(),
-            "duplicates": self.duplicates(),
-            "columns": self.columns(),
-        }
+    def description(self, attrs: Union[str, None] = None) -> Description:
+        # require comma separated values for segments that are required to fetch
+        if attrs is not None:
+            attr_func_mapper = {
+                "analysis": self.analysis,
+                "table": self.table,
+                "variables": self.variables,
+                "scatter": self.scatter,
+                "correlations": self.correlations,
+                "missing": self.missing,
+                "alerts": self.alerts,
+                "package": self.package,
+                "samples": self.samples,
+                "duplicates": self.duplicates,
+                "columns": self.columns,
+            }
+            return {
+                attr: attr_func_mapper[attr]() for attr in attrs.split(",")
+            }

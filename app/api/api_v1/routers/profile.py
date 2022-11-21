@@ -1,14 +1,14 @@
 import json
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pandas_profiling import ProfileReport
 
 from app.core.config import Settings
 from app.models.alerts import Alerts
 from app.models.analysis import Analysis
 from app.models.correlations import Correlations
-from app.models.description import Description
+from app.models.description import Description, ProfileDescriptionRequest
 from app.models.duplicates import Duplicates
 from app.models.missing import Missing
 from app.models.package import Package
@@ -194,14 +194,12 @@ async def profile_duplicates(
     response_model_exclude_none=True,
 )
 async def profile_description(
-    source: str = setting.EXAMPLE_URL,
-    minimal: bool = True,
-    samples_to_show: int = 10,
+    profile_description_request: ProfileDescriptionRequest = Depends(),
 ):
-
     return await get_profile(
-        url=source,
-        minimal=minimal,
-        samples_to_show=samples_to_show,
+        url=profile_description_request.source,
+        minimal=profile_description_request.minimal,
+        samples_to_show=profile_description_request.samples_to_show,
         segment="description",
+        attrs=profile_description_request.attrs,
     )

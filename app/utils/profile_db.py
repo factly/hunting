@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Union
+
 from fastapi.encoders import jsonable_encoder
 from pandas_profiling import ProfileReport
 
@@ -53,12 +55,31 @@ async def save_profile(
     return description
 
 
+async def filter_descriptions_with_attrs(
+    attrs: Union[List[str], None], description
+) -> Dict[str, Any]:
+    """Filter out required attributes among complete description
+
+    Args:
+        attrs (Union[List[str], None]): Comma separated values for attributes; example : "analysis,samples,variables"
+        description (_type_): _description_ : Pandas profiling description which is received either from fetching from store or building it with Pandas Profiling
+
+    Returns:
+        Dict[str, Any]: Pandas Profile with selected attributes
+    """
+    # If filter is None then take all descriptions else pass only required onces
+    if attrs:
+        return {attr: description[attr] for attr in attrs}
+    return description
+
+
 async def get_profile(
     url: str,
     minimal: bool = True,
     samples_to_show: int = 10,
     segment: str = "description",
-):
+    attrs: Union[str, None] = None,
+) -> Dict[str, Any]:
 
     """Get Profile from MongoDB if exists
        Generate the profile from scratch if not exists and save to MongoDB
@@ -76,10 +97,14 @@ async def get_profile(
     # Get the profile from MongoDB
     description = await profiles_collection.find_one({"url": url})
 
+    # check what instances are required from description
+    attrs = attrs.split(",") if isinstance(attrs, str) else None
+
     # Return the profile if exists in MongoDB
     if description:
         if segment == "description":
-            return description
+            return await filter_descriptions_with_attrs(attrs, description)
+        # {attr: description[attr] for attr in attrs.split(",")}
         else:
             return description[segment]
 
@@ -89,6 +114,6 @@ async def get_profile(
 
     # Return the profile based on the segment
     if segment == "description":
-        return description
+        return await filter_descriptions_with_attrs(attrs, description)
     else:
         return description[segment]

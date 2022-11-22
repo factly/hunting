@@ -40,7 +40,7 @@ async def provide_raw_profiling(
         response (json): Pandas-Profile in json
     """
 
-    dataframe = get_dataframe(source)
+    dataframe = await get_dataframe(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to
@@ -186,6 +186,18 @@ async def profile_duplicates(
 ):
 
     return await get_profile(source, minimal=minimal, segment="duplicates")
+
+
+@router.get(
+    "/profile/description/columns/",
+    response_model=List[str],
+    response_model_exclude_none=True,
+)
+async def profile_columns(
+    source: str = setting.EXAMPLE_URL, minimal: bool = True
+):
+
+    return await get_profile(source, minimal=minimal, segment="columns")
 
 
 @router.get(

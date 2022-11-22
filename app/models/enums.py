@@ -15,3 +15,4 @@ class ProfileActions(str, enum.Enum):
     SAMPLES = "samples"
     DUPLICATES = "duplicates"
     DESCRIPTION = "description"
+    COLUMNS = "columns"

@@ -25,7 +25,7 @@ async def save_profile(
         samples_to_fetch (int, optional): Samples of Dataset rows to fetch. Defaults to 10.  # noqa: E501
     """
 
-    dataframe = get_dataframe(url)
+    dataframe = await get_dataframe(url)
 
     if dataframe.shape[0] < 100:
         samples_to_fetch = 5

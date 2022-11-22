@@ -20,6 +20,20 @@ def get_encoding(obj=None, url=None):
     return encoding
 
 
+async def get_dataframe_honouring_encoding(file_url: str) -> pl.DataFrame:
+    try:
+        df = pl.read_csv(file_url, null_values="NA", infer_schema_length=0)
+    except UnicodeDecodeError:
+        encoding = get_encoding(url=file_url)
+        df = pl.read_csv(
+            file_url,
+            null_values="NA",
+            encoding=encoding,
+            infer_schema_length=0,
+        )
+    return df
+
+
 def json_conversion_objects(obj):
     """Fix improper objects while creating json
     Function use to convert non-JSON serializable objects to proper format
@@ -36,7 +50,7 @@ def json_conversion_objects(obj):
         return obj.item()
 
 
-def get_dataframe(file_url: str, source="url"):
+async def get_dataframe(file_url: str, source="url"):
     """Functionality to provide dataframe from various sources
 
     Args:
@@ -54,12 +68,7 @@ def get_dataframe(file_url: str, source="url"):
     url = urlparse(file_url)
 
     if url.scheme == "http" or url.scheme == "https":
-
-        try:
-            df = pl.read_csv(file_url, null_values="NA", infer_schema_length=0)
-        except UnicodeDecodeError:
-            encoding = get_encoding(url=file_url)
-            df = pl.read_csv(file_url, null_values="NA", encoding=encoding)
+        df = await get_dataframe_honouring_encoding(file_url)
         return df
 
     elif url.scheme == "s3":
@@ -71,6 +80,6 @@ def get_dataframe(file_url: str, source="url"):
         )
 
         with fs.open(f"{url.netloc}{url.path}") as f:
-            df = pl.read_csv(f, null_values="NA", infer_schema_length=0)
+            df = await get_dataframe_honouring_encoding(f)
 
         return df

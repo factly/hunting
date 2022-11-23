@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
 import numpy as np
 from numpy import bool_
@@ -11,6 +11,7 @@ from app.core.config import Settings
 from app.models.alerts import Alerts
 from app.models.analysis import Analysis
 from app.models.correlations import Correlations
+from app.models.description import Description
 from app.models.duplicates import Duplicates
 from app.models.missing import Missing
 from app.models.package import Package
@@ -122,7 +123,7 @@ class ProfileSegments:
     def columns(self) -> Union[List[str], None]:
         return self.col_order
 
-    def description(self, attrs: Union[str, None] = None) -> Dict[str, Any]:
+    def description(self, attrs: Union[str, None] = None) -> Description:
         # require comma separated values for segments that are required to fetch
         if attrs is not None:
             attr_func_mapper = {

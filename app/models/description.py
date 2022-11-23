@@ -39,7 +39,9 @@ class ProfileDescriptionRequest(BaseModel):
     attrs: Union[str, None] = Field(default=None)
 
     @validator("attrs")
-    def attrs_should_be_profile_actions(cls, v):
+    def attrs_should_be_profile_actions(
+        cls, v: Union[str, None]
+    ) -> Union[str, None]:
         if isinstance(v, str):
             query_params_set: Set[str] = {attr for attr in v.split(",")}
             valid_params_set: Set[str] = set(

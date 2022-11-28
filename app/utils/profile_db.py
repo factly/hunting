@@ -5,8 +5,8 @@ from pandas_profiling import ProfileReport
 
 from app.core.config import Settings
 from app.db.mongo import profiles_collection
+from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_segments import ProfileSegments
-from app.utils.util_functions import get_dataframe
 
 setting = Settings()
 
@@ -25,7 +25,7 @@ async def save_profile(
         samples_to_fetch (int, optional): Samples of Dataset rows to fetch. Defaults to 10.  # noqa: E501
     """
 
-    dataframe = await get_dataframe(url)
+    dataframe = await get_dataframe_async(url)
 
     if dataframe.shape[0] < 100:
         samples_to_fetch = 5

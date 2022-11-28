@@ -24,6 +24,16 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY_ID: str = "CHANGE_ME"
     S3_SECRET_ACCESS_KEY: str = "CHANGE_ME"
 
+    # REDIS CONFIGURATION
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = "password"
+
+    # CELERY CONFIGURATION
+    CELERY_BROKER_URL: str = "redis://:password@redis:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://:password@redis:6379/0"
+
     # CORS PARAMS
     CORS_ORIGINS: List[str] = ["*"]
     CORS_METHODS: List[str] = ["*"]

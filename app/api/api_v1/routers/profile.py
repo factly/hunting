@@ -16,8 +16,8 @@ from app.models.sample import Sample
 from app.models.scatter import Scatter
 from app.models.table import Table
 from app.models.variables import Variables
+from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_db import get_profile
-from app.utils.util_functions import get_dataframe
 
 profile_router = router = APIRouter()
 setting = Settings()
@@ -40,7 +40,7 @@ async def provide_raw_profiling(
         response (json): Pandas-Profile in json
     """
 
-    dataframe = await get_dataframe(source)
+    dataframe = await get_dataframe_async(source)
 
     # WHAT?: Change sample sizes based on number of rows
     # WHY?: Fow smaller dataset number of samples to

@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 
 from app.models.prefetch import Prefetch
-from app.utils.profile_db import save_profile
+from app.utils.tasks import prefetch_profiles
 
 prefetch_router = router = APIRouter()
 
 
 @router.post("/prefetch/")
-async def prefetch_profiles(prefetch: Prefetch):
+async def prefetch_profiles_background(prefetch: Prefetch):
     """Prefetch and save Profiles for a list of Datasets
 
     Args:
@@ -25,10 +25,9 @@ async def prefetch_profiles(prefetch: Prefetch):
     minimal = prefetch.minimal
     samples_to_fetch = prefetch.samples_to_fetch
 
-    for url in urls:
-        await save_profile(url, minimal, samples_to_fetch)
+    # Prefetch Profiles as a background job
+    result = prefetch_profiles.delay(
+        urls=urls, minimal=minimal, samples_to_fetch=samples_to_fetch
+    )
 
-    # Step 2: Implement prefetching as a background task
-    # Step 3: Create a TaskID and return it to the user
-    # Step 4: Implement MongoDB insert as async
-    return None
+    return result.id

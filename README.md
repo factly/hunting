@@ -22,7 +22,9 @@ Once the application is up and running you should be able to access it using the
 | Service | URL |
 |--|--|
 | Server | API Root: http://0.0.0.0:8000/api/v1 <br> Swagger: http://0.0.0.0:8000/api/docs <br> Redoc: http://0.0.0.0:8000/redoc|
-| Minio | API: http://localhost:9000 <br> Console: http://localhost:9001 <br> Username: minio <br> Password: password|
+| MongoDB | http://localhost:27017 <br> Username: root <br> Password: example <br>|
+| Redis | http://localhost:6379 <br> Password: password|
+| Flower | Dashboard: http://localhost:5555|
 
 
 ### Stopping the application
@@ -49,4 +51,31 @@ Or use the following command to stop the application, and remove all the contain
 ### Prefetch
 
 - Prefetch group of routes will only be enabled if `ENABLE_PREFETCH` is `true`
-- 
+- Flower Dashboard 
+
+### S3
+
+- Limitation is that it will only supports one set of AWS credentials that has access to all the S3 buckets.
+- S3 URL expected in the following pattern: `s3://bucket_name/path/to/file/file_name.csv` 
+
+### Background Task
+
+- On Celery: SecurityWarning: You're running the worker with superuser privileges: this is absolutely not recommended!
+- Redis Backend configuration: https://docs.celeryq.dev/en/stable/userguide/configuration.html#conf-redis-result-backend
+- Confirm about task serialization (Pickle)
+- Split task into several chunks: https://docs.celeryq.dev/en/stable/userguide/canvas.html#canvas-chunks
+- Take care in PROD:
+  - Backends use resources to store and transmit results. To ensure that resources are released, you must eventually call get() or forget() on EVERY AsyncResult instance returned after calling a task.
+- Change Redis database from default 0 to best practice
+- Make Production Ready: 
+  - https://blog.wolt.com/engineering/2021/09/15/5-tips-for-writing-production-ready-celery-tasks/
+
+### TODO
+- Error Handling
+- Structured Logging: https://calmcode.io/logging/introduction.html
+- Convert get_dataframe to async
+- Add helm chart
+- Create index on MongoDB on `url`: https://motor.readthedocs.io/en/stable/api-tornado/motor_collection.html
+- Save and Get from MongoDB only when `ENABLE_PREFETCH` is `True`
+- Add all the example csv files into the project directory
+- Write unit tests for the functionality

@@ -2,12 +2,13 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
 
 WORKDIR /app
 
-ENV POETRY_VERSION=1.1.7
+ENV POETRY_VERSION=1.2.0
 
 # Install Poetry
 RUN curl -sSL  https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
     cd /usr/local/bin && \
     ln -s /opt/poetry/bin/poetry && \
+    poetry config experimental.new-installer false && \
     poetry config virtualenvs.create false
 
 # Copy poetry.lock* in case it doesn't exist in the repo

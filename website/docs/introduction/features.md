@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Key features
 
 Hunting is an open-source library that provides data profiling as a REST API. It offers a range of powerful features for data profiling, including univariate and bivariate analysis, missing value analysis, correlation analysis, and prefetching for profiling large datasets. These features allow users to quickly and easily generate comprehensive reports on the structure and content of their data, and can help users gain a better understanding of their data and identify potential issues and trends.

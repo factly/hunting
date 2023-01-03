@@ -3,8 +3,10 @@ from urllib.parse import urlparse
 
 import numpy as np
 import polars as pl
+import polars.exceptions as pl_exc
 import s3fs
 from charset_normalizer import from_bytes
+from fastapi.logger import logger
 from numpy import bool_
 from requests import get
 
@@ -25,8 +27,10 @@ async def get_dataframe_honouring_encoding_async(
 ) -> pl.DataFrame:
     try:
         df = pl.read_csv(file_url, null_values="NA", infer_schema_length=0)
-    except UnicodeDecodeError:
+    except (UnicodeDecodeError, pl_exc.ComputeError) as err:
+        logger.exception(f"Could not interpret File encoding : {err}")
         encoding = get_encoding(url=file_url)
+        logger.info(f"File encoding for `{file_url}` : {encoding}")
         df = pl.read_csv(
             file_url,
             null_values="NA",
@@ -39,8 +43,10 @@ async def get_dataframe_honouring_encoding_async(
 def get_dataframe_honouring_encoding(file_url: str) -> pl.DataFrame:
     try:
         df = pl.read_csv(file_url, null_values="NA", infer_schema_length=0)
-    except UnicodeDecodeError:
+    except (UnicodeDecodeError, pl_exc.ComputeError) as err:
+        logger.exception(f"Could not interpret File encoding : {err}")
         encoding = get_encoding(url=file_url)
+        logger.info(f"File encoding for `{file_url}` : {encoding}")
         df = pl.read_csv(
             file_url,
             null_values="NA",

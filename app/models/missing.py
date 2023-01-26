@@ -34,3 +34,6 @@ class Missing(BaseModel):
     matrix: Optional[Matrix] = None
     heatmap: Optional[Heatmap] = None
     dendrogram: Optional[Dendrogram] = None
+
+    class Config:
+        underscore_attrs_are_private = True

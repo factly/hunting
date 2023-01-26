@@ -40,5 +40,15 @@ app.include_router(
     prefix=settings.API_V1_STR,
     tags=["Data Profiling"],
 )
+
+if settings.ENABLE_PREFETCH:
+    from app.api.api_v1.routers.prefetch import prefetch_router
+
+    app.include_router(
+        prefetch_router,
+        prefix=settings.API_V1_STR,
+        tags=["Prefetch"],
+    )
+
 # if __name__ == "__main__":
 #     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8888)

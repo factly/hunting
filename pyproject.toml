@@ -11,7 +11,14 @@ fastapi = "^0.85.1"
 uvicorn = "^0.19.0"
 python-dotenv = "^0.21.0"
 pandas-profiling = "^3.3.0"
+aioredis = "^2.0.1"
 polars = {extras = ["numpy", "pandas", "pyarrow", "fsspec"], version = "^0.14.28"}
+motor = "^3.1.1"
+s3fs = "^2022.11.0"
+celery = "^5.2.7"
+redis = "^4.3.4"
+flower = "^1.2.0"
+
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

@@ -1,6 +1,66 @@
 version: "3.7"
 
 services:
+
+  ##########################################################################
+  ######                      BACKGROUND TASKS                       #######
+  ##########################################################################
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379    
+    volumes:
+      - ./volumes/redis:/data
+    command: redis-server --appendonly yes --requirepass password
+    networks:
+      - hunting
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: celery -A app.worker worker -l info
+    depends_on:
+      - redis
+    networks:
+      - hunting      
+
+  flower:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    command: celery -A app.worker flower --port=5555
+    ports:
+      - 5555:5555
+    environment:
+      - CELERY_BROKER_URL=redis://:password@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:password@redis:6379/0
+    depends_on:
+      - redis
+      - celery
+    networks:
+      - hunting
+
+  ##########################################################################
+  ######                           DATABASES                         #######
+  ##########################################################################
+  mongodb:
+    image: mongo:6.0.3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports: 
+      - 27017:27017
+    volumes:
+      - ./volumes/mongodb/:/data/db/
+    networks:
+      - hunting
+
   ##########################################################################
   ######                       HUNTING SERVER                        #######
   ##########################################################################
@@ -18,8 +78,11 @@ services:
       - .:/app  
     env_file:
       - .env
+    depends_on:
+      - redis
     networks:
       - hunting
+
 
 networks:
   hunting:

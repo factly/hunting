@@ -1,0 +1,16 @@
+# List the start up tasks. Learn more: https://www.gitpod.io/docs/configure/workspaces/tasks
+tasks:
+  - name: Start Application with Docker Compose
+    init: docker-compose build # Builds images as a prebuild => https://www.gitpod.io/docs/configure/projects/prebuilds
+    command: docker-compose up # Start the application
+
+# List the ports to expose. Learn more: https://www.gitpod.io/docs/configure/workspaces/ports
+ports:
+  - name: Hunting API
+    description: Expose Port 8000 for the Hunting API
+    port: 8000
+    onOpen: open-browser
+  - name: Flower
+    description: Expose Port 5555 to view the background tasks on Flower
+    port: 5555
+    onOpen: open-browser

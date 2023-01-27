@@ -12,7 +12,3 @@ ports:
     description: Expose Port 8000 for the Hunting API
     port: 8000
     onOpen: open-preview
-  - name: Flower
-    description: Expose Port 5555 to view the background tasks on Flower
-    port: 5555
-    onOpen: open-preview

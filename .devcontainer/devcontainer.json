@@ -4,7 +4,7 @@
       "cpus": 4
     },
     "waitFor": "onCreateCommand",
-    "updateContentCommand": "sh scripts/gitpod-init.sh",
+    "updateContentCommand": "sh scripts/codespaces-init.sh",
     "postCreateCommand": "",
     "postAttachCommand": {
       "server": "docker-compose up"

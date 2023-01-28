@@ -13,7 +13,17 @@
       "8000": {
         "label": "Hunting Server",
         "onAutoForward": "openPreview"
-      }
+      },
+      "5555": {
+        "label": "Flower UI",
+        "onAutoForward": "openPreview"
+      },
+      "27017": {
+        "label": "MongoDB"
+      },
+      "6379": {
+        "label": "Redis"
+      }           
     },
     "forwardPorts": [8000,5555,27017,6379]
   }

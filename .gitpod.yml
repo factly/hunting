@@ -3,7 +3,8 @@ tasks:
   - name: Start Application with Docker Compose
     init: |
       sh scripts/gitpod-init.sh # Setup the environment
-      docker-compose build # Builds images as a prebuild => https://www.gitpod.io/docs/configure/projects/prebuilds
+      docker-compose build # Builds images as a prebuild
+      docker-compose pull # Pulls images as a prebuild
     command: docker-compose up # Start the application
 
 # List the ports to expose. Learn more: https://www.gitpod.io/docs/configure/workspaces/ports
@@ -18,7 +19,7 @@ github:
     # enable for the default branch (defaults to true)
     master: true
     # enable for all branches in this repo (defaults to false)
-    branches: true
+    branches: false
     # enable for pull requests coming from this repo (defaults to true)
     pullRequests: true
     # enable for pull requests coming from forks (defaults to false)

@@ -1,10 +1,9 @@
 # Hunting
 
-The easiest way to get started with Hunting is to open it on Gitpod or GitHub Codespaces:
+The easiest way to explore or contribute to Hunting is to open the project on Gitpod or on GitHub Codespaces:
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/factly/hunting)
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://deshetti-shiny-fiesta-r4g7w969qwr2xppg.github.dev/)
 
 ### Pre-requisites
 

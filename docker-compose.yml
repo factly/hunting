@@ -17,9 +17,10 @@ services:
       - hunting
 
   celery:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    # build:
+      # context: .
+      # dockerfile: Dockerfile.dev
+    image: 100mi/localhunt:0.1
     env_file:
       - .env
     volumes:
@@ -28,12 +29,13 @@ services:
     depends_on:
       - redis
     networks:
-      - hunting      
+      - hunting
 
   flower:
-    build: 
-      context: .
-      dockerfile: Dockerfile.dev
+    # build:
+      # context: .
+      # dockerfile: Dockerfile.dev
+    image: 100mi/localhunt:0.1
     command: celery -A app.worker flower --port=5555
     ports:
       - 5555:5555
@@ -67,15 +69,16 @@ services:
   hunting-server:
     ports:
       - 8000:8000
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    # build:
+      # context: .
+      # dockerfile: Dockerfile.dev
+    image: 100mi/localhunt:0.1
     command: >
       /bin/sh -c "
       poetry run uvicorn app.main:app --reload --host 0.0.0.0;
       "      
     volumes:
-      - .:/app  
+      - .:/app
     env_file:
       - .env
     depends_on:

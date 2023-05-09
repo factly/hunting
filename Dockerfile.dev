@@ -1,8 +1,9 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM python:3.9.13-slim
 
 WORKDIR /app
 
-ENV POETRY_VERSION=1.2.0
+RUN apt-get update
+RUN apt-get install libsm6 libxext6 curl -y
 
 # Install Poetry
 RUN curl -sSL  https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \

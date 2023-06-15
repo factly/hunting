@@ -19,7 +19,7 @@ services:
   celery:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     env_file:
       - .env
     volumes:
@@ -33,13 +33,14 @@ services:
   flower:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     command: celery -A app.worker flower --port=5555
     ports:
       - 5555:5555
     environment:
       - CELERY_BROKER_URL=redis://:password@redis:6379/0
       - CELERY_RESULT_BACKEND=redis://:password@redis:6379/0
+      - FLOWER_UNAUTHENTICATED_API=true
     depends_on:
       - redis
       - celery
@@ -69,10 +70,10 @@ services:
       - 8000:8000
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     command: >
       /bin/sh -c "
-      poetry run uvicorn app.main:app --reload --host 0.0.0.0;
+      uvicorn app.main:app --reload --host 0.0.0.0;
       "      
     volumes:
       - .:/app  

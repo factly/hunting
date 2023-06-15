@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Union
 
 from fastapi.encoders import jsonable_encoder
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 from app.core.config import Settings
 from app.db.mongo import profiles_collection

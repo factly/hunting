@@ -53,54 +53,49 @@ class ProfileSegments:
 
     def analysis(self) -> Analysis:
         return parse_obj_as(
-            Analysis, self.profile_description["analysis"]
+            Analysis, self.profile_description.analysis.__dict__
         ).dict()
 
     def table(self) -> Table:
-        return parse_obj_as(Table, self.profile_description["table"]).dict()
+        return parse_obj_as(Table, self.profile_description.table).dict()
 
     def variables(self) -> Variables:
         # get variables
         variables = json.dumps(
-            self.profile_description["variables"],
+            self.profile_description.variables,
             default=json_conversion_objects,
         ).replace("NaN", '"NaN"')
         mod_var = json.loads(variables)
         return mod_var
 
     def scatter(self) -> Scatter:
-        return parse_obj_as(
-            Scatter, self.profile_description["scatter"]
-        ).dict()
+        return parse_obj_as(Scatter, self.profile_description.scatter).dict()
 
     def correlations(self) -> Correlations:
         # get correlations
-        correlation = self.profile_description.get("correlations", {})
+        correlation = self.profile_description.correlations
         modified_corr = {}
         for each_corr in correlation:
             modified_corr[each_corr] = correlation[each_corr].to_json()
         return modified_corr
 
     def missing(self) -> Missing:
-        return parse_obj_as(
-            Missing, self.profile_description["missing"]
-        ).dict()
+        return parse_obj_as(Missing, self.profile_description.missing).dict()
 
     def alerts(self) -> Alerts:
         all_alerts = []
-        provided_alerts = self.profile_description.get("alerts", [])
+        provided_alerts = self.profile_description.alerts
         for each_alert in provided_alerts:
             all_alerts.append(f"{each_alert}")
         return all_alerts
 
     def package(self) -> Package:
-        return parse_obj_as(
-            Package, self.profile_description["package"]
-        ).dict()
+        return parse_obj_as(Package, self.profile_description.package).dict()
 
     def samples(self) -> List[Sample]:
         # get samples
-        samples = self.pandas_profile.get_sample()
+
+        samples = self.profile_description.sample
         for sample in samples:
             sample.data = sample.data.to_json()
         # * 'head' and 'tail' are returned as dataset sample
@@ -113,7 +108,7 @@ class ProfileSegments:
 
     def duplicates(self) -> Duplicates:
         # get duplicates
-        duplicates = self.pandas_profile.get_duplicates()
+        duplicates = self.profile_description.duplicates
         if isinstance(duplicates, DataFrame):
             mod_duplicates = duplicates.to_json()
         else:

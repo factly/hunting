@@ -10,6 +10,8 @@ services:
     image: redis:alpine
     ports:
       - 6379:6379
+    volumes:
+      - ./volumes/redis:/data
     command: >
       /bin/sh -c "
       redis-server --appendonly yes --requirepass password
@@ -23,6 +25,8 @@ services:
       dockerfile: Dockerfile.dev
     env_file:
       - .env
+    volumes:
+      - .:/app
     command: >
       /bin/sh -c "
       celery -A app.worker worker -l info
@@ -61,6 +65,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports: 
       - 27017:27017
+    volumes:
+      - ./volumes/mongodb/:/data/db/
     networks:
       - hunting
 
@@ -77,6 +83,8 @@ services:
       /bin/sh -c "
       uvicorn app.main:app --reload --host 0.0.0.0;
       "      
+    volumes:
+      - .:/app
     env_file:
       - .env
     depends_on:

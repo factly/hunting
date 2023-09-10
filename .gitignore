@@ -162,6 +162,7 @@ cython_debug/
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+.vscode
 
 # Local History for Visual Studio Code
 .history/
@@ -176,3 +177,6 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
 n
+
+# Example
+app/example/

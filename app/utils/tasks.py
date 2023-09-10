@@ -1,10 +1,13 @@
 from fastapi.encoders import jsonable_encoder
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
+from app.core.logging import get_logger
 from app.db.mongo import profiles_collection
 from app.utils.dataframes import get_dataframe
 from app.utils.profile_segments import ProfileSegments
 from app.worker import celery
+
+logger = get_logger(__name__)
 
 
 @celery.task(name="prefetch_profile")
@@ -22,8 +25,11 @@ def prefetch_profile(
     """
 
     dataframe = get_dataframe(url)
+    logger.info(f"Prefetching Profile for: {url}")
 
     if dataframe.shape[0] < 100:
+        logger.info(f"Dataset has less than 100 rows: {dataframe.shape[0]}")
+        logger.info("Samples to fetch set to 5")
         samples_to_fetch = 5
 
     profile = ProfileReport(
@@ -46,7 +52,7 @@ def prefetch_profile(
     profiles_collection.update_one(
         {"url": url}, {"$set": jsonable_encoder(description)}, upsert=True
     )
-
+    logger.info(f"Profile Prefetched for: {url}")
     return
 
 
@@ -65,6 +71,7 @@ def prefetch_profiles(
     """
 
     for url in urls:
+        logger.info(f"Added to Queue: {url}")
         prefetch_profile.delay(url, minimal, samples_to_fetch)
 
     return

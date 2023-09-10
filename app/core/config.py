@@ -46,5 +46,12 @@ class Settings(BaseSettings):
     # PROFILE SEGMENTS
     SAMPLE_DATA_RENDERER: List[str] = ["head"]
 
+    # LOGGING SETTINGS
+    LOG_LEVEL: str = "DEBUG"
+    LOG_FILE_PATH: str = "logs/app.log"
+    LOG_FILE_SIZE: int = 100_000_000  # 100MB
+    LOG_FILE_BACKUP_COUNT: int = 5
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
     class Config:
         env_file = ".env"

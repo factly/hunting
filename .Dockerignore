@@ -78,6 +78,7 @@ target/
 # Virtual environment
 .venv/
 venv/
+.vscode/
 
 # PyCharm
 .idea
@@ -101,7 +102,6 @@ venv/
 README.md
 
 # Library dependecy metadata
-poetry.lock
 
 # github workflows
 .github/
@@ -113,3 +113,10 @@ volumes/
 
 # Task
 tasks/
+
+# Example
+app/example/
+
+# Gitpod
+scripts/gitpod*
+scripts/codespaces*

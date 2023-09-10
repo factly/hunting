@@ -1,22 +1,20 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM python:3.10-slim-buster as requirements-stage
 
-WORKDIR /app
+WORKDIR /tmp
+RUN pip install poetry
+COPY ./pyproject.toml ./poetry.lock* /tmp/
 
-ENV POETRY_VERSION=1.2.0
+RUN mkdir -p /tmp/app
+COPY ./app /tmp/app
 
-# Install Poetry
-RUN curl -sSL  https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
-    cd /usr/local/bin && \
-    ln -s /opt/poetry/bin/poetry && \
-    poetry config experimental.new-installer false && \
-    poetry config virtualenvs.create false
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
-# Copy poetry.lock* in case it doesn't exist in the repo
-COPY ./pyproject.toml ./poetry.lock* /
 
-# Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
+FROM python:3.10-slim-buster
 
-COPY . .
-ENV PYTHONPATH=/app
+WORKDIR /code
+
+COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY --from=requirements-stage /tmp/app /code/app

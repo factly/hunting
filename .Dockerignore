@@ -12,7 +12,10 @@
 docker-compose.yml
 .docker
 .dockerignore
-Dockerfile?
+Dockerfile
+Dockerfile.prod
+Dockerfile.stag
+Dockerfile.dev
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -120,3 +123,15 @@ app/example/
 # Gitpod
 scripts/gitpod*
 scripts/codespaces*
+
+# Github workflows
+.github
+.devcontainer
+
+# Gitpod
+scripts/gitpod*
+scripts/codespaces*
+.gitpod*
+
+# Env Files
+.env*

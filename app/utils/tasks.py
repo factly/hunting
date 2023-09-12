@@ -12,7 +12,10 @@ logger = get_logger(__name__)
 
 @celery.task(name="prefetch_profile")
 def prefetch_profile(
-    url: str, minimal: bool = True, samples_to_fetch: int = 10
+    url: str,
+    minimal: bool = True,
+    samples_to_fetch: int = 10,
+    trigger_id: str = None,
 ):
 
     """Save Profile to MongoDB
@@ -47,6 +50,7 @@ def prefetch_profile(
 
     # Add `url` to the description before saving to MongoDB
     description["url"] = url
+    description["trigger_id"] = trigger_id
 
     # Upsert a json-encoded description into MongoDB
     profiles_collection.update_one(
@@ -58,7 +62,10 @@ def prefetch_profile(
 
 @celery.task(name="prefetch_profiles")
 def prefetch_profiles(
-    urls: list, minimal: bool = True, samples_to_fetch: int = 10
+    urls: list,
+    minimal: bool = True,
+    samples_to_fetch: int = 10,
+    trigger_id: str = None,
 ):
 
     """Save Profiles to MongoDB
@@ -71,7 +78,6 @@ def prefetch_profiles(
     """
 
     for url in urls:
-        logger.info(f"Added to Queue: {url}")
-        prefetch_profile.delay(url, minimal, samples_to_fetch)
+        prefetch_profile.delay(url, minimal, samples_to_fetch, trigger_id)
 
     return

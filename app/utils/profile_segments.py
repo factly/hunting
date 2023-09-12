@@ -105,7 +105,7 @@ class ProfileSegments:
 
     def duplicates(self) -> Union[str, Dict]:
         # get duplicates
-        duplicates = self.pandas_profile.get_duplicates()
+        duplicates = self.profile_description.duplicates
         if isinstance(duplicates, DataFrame):
             mod_duplicates = duplicates.to_json()
         else:

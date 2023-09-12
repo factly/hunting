@@ -5,9 +5,9 @@ from pydantic.main import BaseModel
 
 
 class Sample(BaseModel):
-    id: str
-    data: Json
-    name: str
+    id: Optional[str]
+    data: Optional[Json]
+    name: Optional[str]
     caption: Optional[str] = None
 
     class Config:

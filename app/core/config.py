@@ -53,5 +53,8 @@ class Settings(BaseSettings):
     LOG_FILE_BACKUP_COUNT: int = 5
     LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+    # PROFILING SETTINGS
+    PROGRESS_BAR: bool = True
+
     class Config:
         env_file = ".env"

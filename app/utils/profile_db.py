@@ -46,7 +46,7 @@ async def save_profile(
         minimal=minimal,
         samples={"head": samples_to_fetch, "tail": samples_to_fetch},
         show_variable_description=False,
-        progress_bar=False,
+        progress_bar=setting.PROGRESS_BAR,
     )
 
     # use `ProfileSegments` to get duplicates part of pandas profiling

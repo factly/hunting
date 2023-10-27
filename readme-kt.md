@@ -10,6 +10,9 @@
    3. [Starting application](#start-application)
    4. [Stopping application](#stop-application)
    5. [Environment variables](#environment-variables)
+5. [Which endpoint to choose?](#endpoint-selection)
+6. [How does prefetch endpoint works?](#prefetch-description)
+7. [How to check failed background tasks?](#prefetch-failed)
 
 </details>
 

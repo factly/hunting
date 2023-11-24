@@ -55,6 +55,7 @@
 
 `hunting` service facilitates creation of dataset profiles i.e. details of dataset variable, correlation, numeric and categorical variables, missing values, etc as a fastAPI service.
 
+It uses `ydata-profiling`: https://docs.profiling.ydata.ai/
 
 ---
 

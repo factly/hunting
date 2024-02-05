@@ -1,11 +1,14 @@
-from typing import Any, Dict, List, Optional, Union, Annotated
+from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, constr, RootModel, StringConstraints
+from pydantic import BaseModel, Field, RootModel, StringConstraints
 
 from app.core.config import Settings
 
 settings = Settings()
-VARIABLE_COLUMN_CONSTRAINT = Annotated[str, StringConstraints(pattern=settings.COLUMN_NAME_REGEX_PATTERN)]
+VARIABLE_COLUMN_CONSTRAINT = Annotated[
+    str, StringConstraints(pattern=settings.COLUMN_NAME_REGEX_PATTERN)
+]
+
 
 class VariableProperties(BaseModel):
     n_distinct: Optional[int]
@@ -52,5 +55,7 @@ class VariableProperties(BaseModel):
     histogram: Optional[List[Any]]
 
 
-class Variables(RootModel[Dict[VARIABLE_COLUMN_CONSTRAINT, VariableProperties]]):
+class Variables(
+    RootModel[Dict[VARIABLE_COLUMN_CONSTRAINT, VariableProperties]]
+):
     pass

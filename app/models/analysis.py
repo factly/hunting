@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Optional
 
 from pydantic.main import BaseModel
 
 
 class Analysis(BaseModel):
-    title: str
-    date_start: datetime
-    date_end: datetime
-    duration: timedelta
+    title: Optional[str]
+    date_start: Optional[datetime]
+    date_end: Optional[datetime]
 
     class Config:
         underscore_attrs_are_private = True

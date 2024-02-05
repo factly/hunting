@@ -1,19 +1,24 @@
 from typing import Any, Dict, List, Union
 
 from fastapi.encoders import jsonable_encoder
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 from app.core.config import Settings
+from app.core.logging import get_logger
 from app.db.mongo import profiles_collection
 from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_segments import ProfileSegments
 
 setting = Settings()
+logger = get_logger(__name__)
 
 
 # TODO: return status after saving to MongoDB
 async def save_profile(
-    url: str, minimal: bool = True, samples_to_fetch: int = 10
+    url: str,
+    minimal: bool = True,
+    samples_to_fetch: int = 10,
+    round_to: int = 3,
 ):
 
     """Save Profile to MongoDB
@@ -26,8 +31,14 @@ async def save_profile(
     """
 
     dataframe = await get_dataframe_async(url)
+    if dataframe is None or dataframe.is_empty():
+        raise ValueError(
+            f"Unable to fetch dataframe for url or Dataframe is Null: {url}"
+        )
 
     if dataframe.shape[0] < 100:
+        logger.info(f"Dataset has less than 100 rows: {dataframe.shape[0]}")
+        logger.info("Samples to fetch set to 5")
         samples_to_fetch = 5
 
     profile = ProfileReport(
@@ -35,11 +46,13 @@ async def save_profile(
         minimal=minimal,
         samples={"head": samples_to_fetch, "tail": samples_to_fetch},
         show_variable_description=False,
-        progress_bar=False,
+        progress_bar=setting.PROGRESS_BAR,
     )
 
     # use `ProfileSegments` to get duplicates part of pandas profiling
-    profile_segment = ProfileSegments(profile, columns=list(dataframe.columns))
+    profile_segment = ProfileSegments(
+        profile, columns=list(dataframe.columns), round_to=round_to
+    )
 
     description = profile_segment.description()
 
@@ -51,7 +64,7 @@ async def save_profile(
     await profiles_collection.update_one(
         {"url": url}, {"$set": jsonable_encoder(description)}, upsert=True
     )
-
+    logger.info(f"Profile Prefetched for: {url}")
     return description
 
 
@@ -68,6 +81,7 @@ async def filter_descriptions_with_attrs(
         Dict[str, Any]: Pandas Profile with selected attributes
     """
     # If filter is None then take all descriptions else pass only required onces
+    logger.info(f"Filtering description with attrs: {attrs}")
     if attrs:
         return {attr: description[attr] for attr in attrs}
     return description
@@ -95,6 +109,7 @@ async def get_profile(
     """
 
     # Get the profile from MongoDB
+    logger.info(f"Fetching Profile if exist for: {url}")
     description = await profiles_collection.find_one({"url": url})
 
     # check what instances are required from description
@@ -102,12 +117,14 @@ async def get_profile(
 
     # Return the profile if exists in MongoDB
     if description:
+        logger.info(f"Profile exist for: {url}")
         if segment == "description":
             return await filter_descriptions_with_attrs(attrs, description)
         # {attr: description[attr] for attr in attrs.split(",")}
         else:
             return description[segment]
 
+    logger.info(f"Profile does not exist for: {url}")
     # 1. Generate the profile from scratch
     # 2. Save to MongoDB for subsequent requests
     description = await save_profile(url, minimal, samples_to_show)

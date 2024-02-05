@@ -1,6 +1,6 @@
 import datetime
 import json
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 from numpy import bool_
@@ -8,17 +8,12 @@ from pandas import DataFrame
 from pydantic import parse_obj_as
 
 from app.core.config import Settings
-from app.models.alerts import Alerts
 from app.models.analysis import Analysis
-from app.models.correlations import Correlations
-from app.models.description import Description
-from app.models.duplicates import Duplicates
 from app.models.missing import Missing
 from app.models.package import Package
 from app.models.sample import Sample
 from app.models.scatter import Scatter
 from app.models.table import Table
-from app.models.variables import Variables
 
 settings = Settings()
 
@@ -43,66 +38,63 @@ def json_conversion_objects(obj):
 
 
 class ProfileSegments:
-    def __init__(self, pandas_profile, columns=None):
+    def __init__(self, pandas_profile, columns=None, round_to=3):
         """
         Pass pandas profile of a dataset as argument
         """
         self.pandas_profile = pandas_profile
         self.profile_description = pandas_profile.get_description()
         self.col_order = columns
+        self.round_to = round_to
 
-    def analysis(self) -> Analysis:
+    def analysis(self) -> Dict:
         return parse_obj_as(
-            Analysis, self.profile_description["analysis"]
+            Analysis, self.profile_description.analysis.__dict__
         ).dict()
 
-    def table(self) -> Table:
-        return parse_obj_as(Table, self.profile_description["table"]).dict()
+    def table(self) -> Dict:
+        return parse_obj_as(Table, self.profile_description.table).dict()
 
-    def variables(self) -> Variables:
+    def variables(self) -> Dict:
         # get variables
         variables = json.dumps(
-            self.profile_description["variables"],
+            self.profile_description.variables,
             default=json_conversion_objects,
         ).replace("NaN", '"NaN"')
         mod_var = json.loads(variables)
         return mod_var
 
-    def scatter(self) -> Scatter:
+    def scatter(self) -> Dict:
         return parse_obj_as(
-            Scatter, self.profile_description["scatter"]
+            Scatter, {"data": self.profile_description.scatter}
         ).dict()
 
-    def correlations(self) -> Correlations:
+    def correlations(self) -> Dict[str, Any]:
         # get correlations
-        correlation = self.profile_description.get("correlations", {})
+        correlation = self.profile_description.correlations
         modified_corr = {}
         for each_corr in correlation:
             modified_corr[each_corr] = correlation[each_corr].to_json()
         return modified_corr
 
-    def missing(self) -> Missing:
-        return parse_obj_as(
-            Missing, self.profile_description["missing"]
-        ).dict()
+    def missing(self) -> Dict:
+        return parse_obj_as(Missing, self.profile_description.missing).dict()
 
-    def alerts(self) -> Alerts:
+    def alerts(self) -> List[str]:
         all_alerts = []
-        provided_alerts = self.profile_description.get("alerts", [])
+        provided_alerts = self.profile_description.alerts
         for each_alert in provided_alerts:
             all_alerts.append(f"{each_alert}")
         return all_alerts
 
-    def package(self) -> Package:
-        return parse_obj_as(
-            Package, self.profile_description["package"]
-        ).dict()
+    def package(self) -> Dict:
+        return parse_obj_as(Package, self.profile_description.package).dict()
 
     def samples(self) -> List[Sample]:
         # get samples
-        samples = self.pandas_profile.get_sample()
+        samples = self.profile_description.sample
         for sample in samples:
-            sample.data = sample.data.to_json()
+            sample.data = sample.data.round(decimals=self.round_to).to_json()
         # * 'head' and 'tail' are returned as dataset sample
         # * use env variable to select `hear` or `tail` or `both`
         return [
@@ -111,9 +103,9 @@ class ProfileSegments:
             if sample.id in settings.SAMPLE_DATA_RENDERER
         ]
 
-    def duplicates(self) -> Duplicates:
+    def duplicates(self) -> Union[str, Dict]:
         # get duplicates
-        duplicates = self.pandas_profile.get_duplicates()
+        duplicates = self.profile_description.duplicates
         if isinstance(duplicates, DataFrame):
             mod_duplicates = duplicates.to_json()
         else:
@@ -123,7 +115,7 @@ class ProfileSegments:
     def columns(self) -> Union[List[str], None]:
         return self.col_order
 
-    def description(self, attrs: Union[str, None] = None) -> Description:
+    def description(self, attrs: Union[str, None] = None) -> Dict:
         # require comma separated values for segments that are required to fetch
         if attrs is not None:
             attr_func_mapper = {

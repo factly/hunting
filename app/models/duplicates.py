@@ -1,7 +1,7 @@
-from typing import Union
+from typing import Any
 
-from pydantic import BaseModel, Json
+from pydantic import RootModel
 
 
-class Duplicates(BaseModel):
-    __root__: Union[Json, str]
+class Duplicates(RootModel[Any]):
+    pass

@@ -6,27 +6,27 @@ from pydantic import BaseModel
 
 
 class Bar(BaseModel):
-    name: str
-    caption: str
-    matrix: str
+    name: Optional[str]
+    caption: Optional[str]
+    matrix: Optional[str]
 
 
 class Matrix(BaseModel):
-    name: str
-    caption: str
-    matrix: str
+    name: Optional[str]
+    caption: Optional[str]
+    matrix: Optional[str]
 
 
 class Heatmap(BaseModel):
-    name: str
-    caption: str
-    matrix: str
+    name: Optional[str]
+    caption: Optional[str]
+    matrix: Optional[str]
 
 
 class Dendrogram(BaseModel):
-    name: str
-    caption: str
-    matrix: str
+    name: Optional[str]
+    caption: Optional[str]
+    matrix: Optional[str]
 
 
 class Missing(BaseModel):

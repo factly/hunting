@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -41,10 +41,21 @@ class Settings(BaseSettings):
 
     # MODEL PARAMS
     # Constraint for Column names
-    COLUMN_NAME_REGEX_PATTERN = r"[\w\s]*"
+    COLUMN_NAME_REGEX_PATTERN: str = r"[\w\s]*"
 
     # PROFILE SEGMENTS
     SAMPLE_DATA_RENDERER: List[str] = ["head"]
 
+    # LOGGING SETTINGS
+    LOG_LEVEL: str = "DEBUG"
+    LOG_FILE_PATH: str = "logs/app.log"
+    LOG_FILE_SIZE: int = 100_000_000  # 100MB
+    LOG_FILE_BACKUP_COUNT: int = 5
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+    # PROFILING SETTINGS
+    PROGRESS_BAR: bool = True
+
     class Config:
         env_file = ".env"
+        extra = "ignore"

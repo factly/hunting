@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models.prefetch import Prefetch
+from app.models.prefetch import Prefetch, PrefetchResponse
 from app.utils.tasks import prefetch_profiles
 
 prefetch_router = router = APIRouter()
@@ -24,10 +24,17 @@ async def prefetch_profiles_background(prefetch: Prefetch):
     urls = prefetch.urls
     minimal = prefetch.minimal
     samples_to_fetch = prefetch.samples_to_fetch
+    trigger_id = prefetch.trigger_id
 
     # Prefetch Profiles as a background job
     result = prefetch_profiles.delay(
-        urls=urls, minimal=minimal, samples_to_fetch=samples_to_fetch
+        urls=urls,
+        minimal=minimal,
+        samples_to_fetch=samples_to_fetch,
+        trigger_id=trigger_id,
     )
 
-    return result.id
+    return PrefetchResponse(
+        task_id=result.id,
+        trigger_id=trigger_id,
+    )

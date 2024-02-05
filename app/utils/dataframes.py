@@ -7,13 +7,14 @@ import polars as pl
 import polars.exceptions as pl_exc
 import s3fs
 from charset_normalizer import from_bytes
-from fastapi.logger import logger
 from numpy import bool_
 from requests import get
 
 from app.core.config import Settings
+from app.core.logging import get_logger
 
 setting = Settings()
+logger = get_logger(__name__)
 
 
 def get_encoding(obj: Union[str, bytes], is_object=False) -> str:
@@ -50,7 +51,8 @@ async def get_dataframe_honouring_encoding_async(
     try:
         df = pl.read_csv(source, null_values="NA", infer_schema_length=0)
     except (UnicodeDecodeError, pl_exc.ComputeError) as err:
-        logger.error(f"Could not interpret File encoding : {err}")
+        logger.warning(f"File encoding is not default: {err}")
+        logger.warning("Trying to read file with proper encoding")
         encoding = get_encoding(obj=source, is_object=is_object)
         logger.info(f"File encoding : {encoding}")
         df = pl.read_csv(
@@ -122,7 +124,9 @@ async def get_dataframe_async(file_url: str):
     url = urlparse(file_url)
 
     if url.scheme == "http" or url.scheme == "https":
+        logger.info("Check for files with http/https extension")
         df = await get_dataframe_honouring_encoding_async(file_url)
+        logger.info("Dataframe generated from http/https file")
         return df
 
     elif url.scheme == "s3":
@@ -132,12 +136,19 @@ async def get_dataframe_async(file_url: str):
             secret=setting.S3_SECRET_ACCESS_KEY,
             client_kwargs={"endpoint_url": setting.S3_ENDPOINT_URL},
         )
-
-        with fs.open(f"{url.netloc}{url.path}", "rb") as f:
-            obj = f.read()
-
-        df = await get_dataframe_honouring_encoding_async(obj, is_object=True)
-        return df
+        try:
+            with fs.open(f"{url.netloc}{url.path}", "rb") as f:
+                obj = f.read()
+                logger.info(f"File read from s3 : {url.path}")
+        except Exception as err:
+            logger.error("Could not read file from s3")
+            raise err
+        else:
+            df = await get_dataframe_honouring_encoding_async(
+                obj, is_object=True
+            )
+            logger.info("Dataframe generated from s3 file")
+            return df
 
 
 def get_dataframe(file_url: str):
@@ -156,7 +167,9 @@ def get_dataframe(file_url: str):
     url = urlparse(file_url)
 
     if url.scheme == "http" or url.scheme == "https":
+        logger.info("Check for files with http/https extension")
         df = get_dataframe_honouring_encoding(source=file_url, is_object=False)
+        logger.info("Dataframe generated from http/https file")
         return df
 
     elif url.scheme == "s3":
@@ -166,10 +179,15 @@ def get_dataframe(file_url: str):
             secret=setting.S3_SECRET_ACCESS_KEY,
             client_kwargs={"endpoint_url": setting.S3_ENDPOINT_URL},
         )
-
-        with fs.open(f"{url.netloc}{url.path}", "rb") as f:
-            file_content = f.read()
-        df = get_dataframe_honouring_encoding(
-            source=file_content, is_object=True
-        )
-        return df
+        try:
+            with fs.open(f"{url.netloc}{url.path}", "rb") as f:
+                file_content = f.read()
+        except Exception as err:
+            logger.error("Could not read file from s3")
+            raise err
+        else:
+            df = get_dataframe_honouring_encoding(
+                source=file_content, is_object=True
+            )
+            logger.info("Dataframe generated from s3 file")
+            return df

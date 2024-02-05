@@ -1,11 +1,13 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, constr
+from pydantic import BaseModel, Field, RootModel, StringConstraints
 
 from app.core.config import Settings
 
 settings = Settings()
-VARIABLE_COLUMN_CONSTRAINT = constr(regex=settings.COLUMN_NAME_REGEX_PATTERN)
+VARIABLE_COLUMN_CONSTRAINT = Annotated[
+    str, StringConstraints(pattern=settings.COLUMN_NAME_REGEX_PATTERN)
+]
 
 
 class VariableProperties(BaseModel):
@@ -29,8 +31,8 @@ class VariableProperties(BaseModel):
     mean: Optional[float]
     std: Optional[float]
     variance: Optional[float]
-    min: Optional[int]
-    max: Optional[float]
+    min: Optional[Any]
+    max: Optional[Any]
     kurtosis: Optional[float]
     skewness: Optional[float]
     sum: Optional[float]
@@ -53,5 +55,7 @@ class VariableProperties(BaseModel):
     histogram: Optional[List[Any]]
 
 
-class Variables(BaseModel):
-    __root__: Dict[VARIABLE_COLUMN_CONSTRAINT, VariableProperties]
+class Variables(
+    RootModel[Dict[VARIABLE_COLUMN_CONSTRAINT, VariableProperties]]
+):
+    pass

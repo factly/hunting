@@ -2,7 +2,7 @@ import json
 from typing import List
 
 from fastapi import APIRouter, Depends
-from pandas_profiling import ProfileReport
+from ydata_profiling import ProfileReport
 
 from app.core.config import Settings
 from app.models.alerts import Alerts

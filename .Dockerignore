@@ -3,6 +3,9 @@
 .git
 .gitignore
 
+# Python
+*/.venv/
+
 # CI
 .codeclimate.yml
 .travis.yml

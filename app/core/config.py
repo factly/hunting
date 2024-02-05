@@ -1,7 +1,6 @@
 from typing import List
 
-from pydantic import BaseSettings
-
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Hunting Server"
@@ -41,7 +40,7 @@ class Settings(BaseSettings):
 
     # MODEL PARAMS
     # Constraint for Column names
-    COLUMN_NAME_REGEX_PATTERN = r"[\w\s]*"
+    COLUMN_NAME_REGEX_PATTERN: str = r"[\w\s]*"
 
     # PROFILE SEGMENTS
     SAMPLE_DATA_RENDERER: List[str] = ["head"]
@@ -58,3 +57,4 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"

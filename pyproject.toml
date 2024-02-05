@@ -11,14 +11,15 @@ python-dotenv = "^0.21.0"
 aioredis = "^2.0.1"
 motor = "^3.1.1"
 s3fs = "^2022.11.0"
-celery = "^5.2.7"
+celery = "^5.3.6"
 redis = "^4.3.4"
 flower = "^1.2.0"
 rich = "^13.5.2"
-polars = {extras = ["fsspec", "numpy", "pandas", "pyarrow"], version = "^0.19.2"}
-ydata-profiling = "^4.5.1"
+polars = {extras = ["fsspec", "numpy", "pandas", "pyarrow"], version = "^0.20.7"}
+ydata-profiling = "^4.6.4"
 fastapi = "^0.103.1"
 uvicorn = "^0.23.2"
+pydantic-settings = "^2.1.0"
 
 
 [tool.poetry.dev-dependencies]

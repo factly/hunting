@@ -1,7 +1,7 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import RootModel
 
 
-class Duplicates(BaseModel):
-    __root__: Any
+class Duplicates(RootModel[Any]):
+    pass

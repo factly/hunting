@@ -33,6 +33,8 @@ services:
       - redis
     networks:
       - hunting
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
 
   flower:
     build: 
@@ -74,7 +76,7 @@ services:
   ##########################################################################
   hunting-server:
     ports:
-      - 8000:8000
+      - 8002:8000
     build:
       context: .
       dockerfile: Dockerfile
@@ -90,6 +92,8 @@ services:
       - .:/app
     networks:
       - hunting
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
 
 
 networks:

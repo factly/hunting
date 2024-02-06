@@ -2,7 +2,7 @@ from fastapi.encoders import jsonable_encoder
 from ydata_profiling import ProfileReport
 
 from app.core.logging import get_logger
-from app.db.mongo import profiles_collection
+from app.db.mongo import sync_profiles_collection
 from app.utils.dataframes import get_dataframe
 from app.utils.profile_segments import ProfileSegments
 from app.worker import celery
@@ -53,7 +53,7 @@ def prefetch_profile(
     description["trigger_id"] = trigger_id
 
     # Upsert a json-encoded description into MongoDB
-    profiles_collection.update_one(
+    sync_profiles_collection.update_one(
         {"url": url}, {"$set": jsonable_encoder(description)}, upsert=True
     )
     logger.info(f"Profile Prefetched for: {url}")

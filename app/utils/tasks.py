@@ -1,3 +1,5 @@
+import time
+
 from fastapi.encoders import jsonable_encoder
 from ydata_profiling import ProfileReport
 
@@ -26,9 +28,11 @@ def prefetch_profile(
         minimal (bool, optional): Mode of Profile that needs to be fetched. Defaults to True.  # noqa: E501
         samples_to_fetch (int, optional): Samples of Dataset rows to fetch. Defaults to 10.  # noqa: E501
     """
-
+    start_time = time.perf_counter()
     dataframe = get_dataframe(url)
     logger.info(f"Prefetching Profile for: {url}")
+    fetch_time = time.perf_counter() - start_time
+    logger.info(f"Time taken to fetch the dataset: {fetch_time:0.4f} seconds")
 
     if dataframe.shape[0] < 100:
         logger.info(f"Dataset has less than 100 rows: {dataframe.shape[0]}")
@@ -47,16 +51,23 @@ def prefetch_profile(
     profile_segment = ProfileSegments(profile, columns=list(dataframe.columns))
 
     description = profile_segment.description()
-
+    profile_time = time.perf_counter() - fetch_time
     # Add `url` to the description before saving to MongoDB
     description["url"] = url
     description["trigger_id"] = trigger_id
+    logger.info(
+        f"Time taken to generate the profile: {profile_time:0.4f} seconds"
+    )
 
     # Upsert a json-encoded description into MongoDB
     sync_profiles_collection.update_one(
         {"url": url}, {"$set": jsonable_encoder(description)}, upsert=True
     )
     logger.info(f"Profile Prefetched for: {url}")
+    upsert_time = time.perf_counter() - profile_time
+    logger.info(
+        f"Time taken to upsert the profile: {upsert_time:0.4f} seconds"
+    )
     return
 
 

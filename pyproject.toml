@@ -16,10 +16,9 @@ redis = "^4.3.4"
 flower = "^1.2.0"
 rich = "^13.5.2"
 polars = {extras = ["fsspec", "numpy", "pandas", "pyarrow"], version = "^0.20.7"}
-ydata-profiling = "^4.6.4"
-fastapi = "^0.103.1"
+ydata-profiling = "4.6.0"
+fastapi = "0.109.2"
 uvicorn = "^0.23.2"
-pydantic-settings = "^2.1.0"
 
 
 [tool.poetry.dev-dependencies]

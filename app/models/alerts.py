@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from pydantic import RootModel
+from pydantic import BaseModel
 
 
-class Alerts(RootModel[Optional[List[str]]]):
-    pass
+class Alerts(BaseModel):
+    __root__: Optional[List[str]]

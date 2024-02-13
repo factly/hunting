@@ -78,7 +78,7 @@ services:
   ##########################################################################
   hunting-server:
     ports:
-      - 8000:8000
+      - 8002:8000
     build:
       context: .
       dockerfile: Dockerfile

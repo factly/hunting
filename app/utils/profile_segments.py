@@ -6,6 +6,7 @@ import numpy as np
 from numpy import bool_
 from pandas import DataFrame
 from pydantic import parse_obj_as
+from ydata_profiling import ProfileReport
 
 from app.core.config import Settings
 from app.models.analysis import Analysis
@@ -38,7 +39,9 @@ def json_conversion_objects(obj):
 
 
 class ProfileSegments:
-    def __init__(self, pandas_profile, columns=None, round_to=3):
+    def __init__(
+        self, pandas_profile: ProfileReport, columns=None, round_to=3
+    ):
         """
         Pass pandas profile of a dataset as argument
         """
@@ -93,6 +96,9 @@ class ProfileSegments:
     def samples(self) -> List[Sample]:
         # get samples
         samples = self.profile_description.sample
+        import logging
+
+        logging.error(samples)
         for sample in samples:
             sample.data = sample.data.round(decimals=self.round_to).to_json()
         # * 'head' and 'tail' are returned as dataset sample

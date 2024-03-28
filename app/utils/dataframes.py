@@ -49,7 +49,7 @@ async def get_dataframe_honouring_encoding_async(
         pl.DataFrame: polars Dataframe object
     """
     try:
-        df = pl.read_csv(source, null_values="NA", infer_schema_length=0)
+        df = pl.read_csv(source, null_values="NA", infer_schema_length=None)
     except (UnicodeDecodeError, pl_exc.ComputeError) as err:
         logger.warning(f"File encoding is not default: {err}")
         logger.warning("Trying to read file with proper encoding")
@@ -59,7 +59,7 @@ async def get_dataframe_honouring_encoding_async(
             source,
             null_values="NA",
             encoding=encoding,
-            infer_schema_length=0,
+            infer_schema_length=None,
         )
     return df
 
@@ -78,7 +78,7 @@ def get_dataframe_honouring_encoding(
         pl.DataFrame: polars Dataframe object
     """
     try:
-        df = pl.read_csv(source, null_values="NA", infer_schema_length=0)
+        df = pl.read_csv(source, null_values="NA", infer_schema_length=None)
     except (UnicodeDecodeError, pl_exc.ComputeError) as err:
         logger.error(f"Could not interpret File encoding : {err}")
         encoding = get_encoding(obj=source, is_object=is_object)
@@ -87,7 +87,7 @@ def get_dataframe_honouring_encoding(
             source,
             null_values="NA",
             encoding=encoding,
-            infer_schema_length=0,
+            infer_schema_length=None,
         )
     return df
 

@@ -96,9 +96,6 @@ class ProfileSegments:
     def samples(self) -> List[Sample]:
         # get samples
         samples = self.profile_description.sample
-        import logging
-
-        logging.error(samples)
         for sample in samples:
             sample.data = sample.data.round(decimals=self.round_to).to_json()
         # * 'head' and 'tail' are returned as dataset sample

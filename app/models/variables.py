@@ -1,6 +1,7 @@
+from math import isnan
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, constr
+from pydantic import BaseModel, Field, constr, validator
 
 from app.core.config import Settings
 
@@ -51,6 +52,12 @@ class VariableProperties(BaseModel):
     monotonic_decrease_strict: Optional[bool]
     monotonic: Optional[int]
     histogram: Optional[List[Any]]
+
+    @validator("*")
+    def change_nan_to_none(cls, v, field):
+        if field.outer_type_ is float and isnan(v):
+            return None
+        return v
 
 
 class Variables(BaseModel):

@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Union
+from uuid import uuid4
 
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from ydata_profiling import ProfileReport
 
@@ -8,9 +10,7 @@ from app.core.logging import get_logger
 from app.db.mongo import profiles_collection
 from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_segments import ProfileSegments
-from fastapi import HTTPException
 from app.utils.tasks import prefetch_profiles
-from uuid import uuid4
 
 setting = Settings()
 logger = get_logger(__name__)
@@ -134,4 +134,6 @@ async def get_profile(
             samples_to_fetch=samples_to_show,
             trigger_id=str(uuid4()),
         )
-        raise HTTPException(status_code=404, detail="Profile does not exist for the URL")
+        raise HTTPException(
+            status_code=404, detail="Profile does not exist for the URL"
+        )

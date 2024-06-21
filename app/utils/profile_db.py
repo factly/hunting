@@ -9,7 +9,6 @@ from app.db.mongo import profiles_collection
 from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_segments import ProfileSegments
 from fastapi import HTTPException
-from app.models.prefetch import Prefetch
 from app.utils.tasks import prefetch_profiles
 from uuid import uuid4
 

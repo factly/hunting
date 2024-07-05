@@ -1,4 +1,4 @@
-from math import isnan
+from math import isinf, isnan
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, constr, validator
@@ -56,6 +56,8 @@ class VariableProperties(BaseModel):
     @validator("*")
     def change_nan_to_none(cls, v, field):
         if field.outer_type_ is float and isnan(v):
+            return None
+        elif isinstance(v, float) and isinf(v):
             return None
         return v
 

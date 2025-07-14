@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Union
+from uuid import uuid4
 
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from ydata_profiling import ProfileReport
 
@@ -8,6 +10,7 @@ from app.core.logging import get_logger
 from app.db.mongo import profiles_collection
 from app.utils.dataframes import get_dataframe_async
 from app.utils.profile_segments import ProfileSegments
+from app.utils.tasks import prefetch_profiles
 
 setting = Settings()
 logger = get_logger(__name__)
@@ -123,14 +126,14 @@ async def get_profile(
         # {attr: description[attr] for attr in attrs.split(",")}
         else:
             return description[segment]
-
-    logger.info(f"Profile does not exist for: {url}")
-    # 1. Generate the profile from scratch
-    # 2. Save to MongoDB for subsequent requests
-    description = await save_profile(url, minimal, samples_to_show)
-
-    # Return the profile based on the segment
-    if segment == "description":
-        return await filter_descriptions_with_attrs(attrs, description)
     else:
-        return description[segment]
+        logger.error(f"Profile does not exist for: {url}")
+        prefetch_profiles.delay(
+            urls=[url],
+            minimal=minimal,
+            samples_to_fetch=samples_to_show,
+            trigger_id=str(uuid4()),
+        )
+        raise HTTPException(
+            status_code=404, detail="Profile does not exist for the URL"
+        )
